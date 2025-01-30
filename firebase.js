@@ -1,16 +1,18 @@
-// Insira suas credenciais do Firebase aqui
+// Configurações do Firebase com as credenciais fornecidas
 const firebaseConfig = {
-  apiKey: "SUA_API_KEY",
-  authDomain: "SEU_AUTH_DOMAIN",
-  projectId: "SEU_PROJECT_ID",
-  storageBucket: "SEU_STORAGE_BUCKET",
-  messagingSenderId: "SEU_MESSAGING_SENDER_ID",
-  appId: "SEU_APP_ID",
-  measurementId: "SEU_MEASUREMENT_ID"
+  apiKey: "AIzaSyBe_IQ94B8HndgT91IGUK1UHXa9p_88Kkg",
+  authDomain: "whatsapp-b95fa.firebaseapp.com",
+  projectId: "whatsapp-b95fa",
+  storageBucket: "whatsapp-b95fa.appspot.com",
+  messagingSenderId: "492675366043",
+  appId: "1:492675366043:android:aafc6fd2b1991c541c9a3e",
+  measurementId: "G-XXXXXXX",
+  databaseURL: "https://whatsapp-b95fa-default-rtdb.firebaseio.com/"
 };
 
-// Inicializar o Firebase
+// Inicializa o Firebase
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
 const storage = firebase.storage();
+const realTimeDb = firebase.database();
