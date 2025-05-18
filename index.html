@@ -1,17 +1,117 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Splash Screen</title>
-  <link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Placard Viewer</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+            font-family: Arial, sans-serif;
+        }
+        
+        .iframe-container {
+            width: 95%;
+            height: 95vh;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 0 30px rgba(0, 150, 255, 0.3);
+            position: relative;
+        }
+        
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            background-color: #000;
+        }
+        
+        .loading {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background-color: #111;
+            color: #fff;
+            z-index: 10;
+        }
+        
+        .loading-spinner {
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #3498db;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
 </head>
 <body>
-  <div class="loader"></div>
-  <script>
-    setTimeout(() => {
-      window.location.href = "login.html";
-    }, 4000);
-  </script>
+    <div class="iframe-container">
+        <div class="loading">
+            <div class="loading-spinner"></div>
+            <p>Carregando o conteúdo...</p>
+        </div>
+        <iframe id="siteFrame" src="proxy.php"></iframe>
+    </div>
+
+    <script>
+        const iframe = document.getElementById('siteFrame');
+        const loading = document.querySelector('.loading');
+        
+        iframe.onload = function() {
+            loading.style.display = 'none';
+            
+            // Tenta injetar um script para corrigir possíveis problemas
+            try {
+                const script = iframe.contentDocument.createElement('script');
+                script.text = `
+                    // Corrige links para abrirem no iframe
+                    document.addEventListener('click', function(e) {
+                        if (e.target.tagName === 'A') {
+                            e.preventDefault();
+                            window.parent.postMessage({ type: 'navigate', url: e.target.href }, '*');
+                        }
+                    });
+                    
+                    // Notifica se houve bloqueio
+                    if (window === window.top) {
+                        window.parent.postMessage({ type: 'frameBlocked' }, '*');
+                    }
+                `;
+                iframe.contentDocument.head.appendChild(script);
+            } catch (e) {
+                // Ignora erros de cross-origin
+            }
+        };
+        
+        // Comunicação entre frames
+        window.addEventListener('message', function(e) {
+            if (e.data.type === 'navigate') {
+                iframe.src = e.data.url;
+                loading.style.display = 'flex';
+            } else if (e.data.type === 'frameBlocked') {
+                loading.innerHTML = '<p>O site não pode ser exibido nesta visualização.</p>';
+            }
+        });
+    </script>
 </body>
-</html>
+  </html>
