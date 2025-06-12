@@ -3,115 +3,574 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Placard Viewer</title>
+    <title>Gerador de Números Moçambicanos</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <style>
-        body {
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --accent-color: #e74c3c;
+            --light-color: #ecf0f1;
+            --dark-color: #2c3e50;
+            --success-color: #27ae60;
+            --warning-color: #f39c12;
+        }
+
+        * {
             margin: 0;
             padding: 0;
-            background-color: #000;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f5f7fa;
+            color: var(--dark-color);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 2rem;
+            padding: 1.5rem;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        header h1 {
+            font-size: 2.2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .card {
+            background: white;
+            border-radius: 10px;
+            padding: 2rem;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+
+        .controls {
+            margin-bottom: 2rem;
+        }
+
+        h3 {
+            margin-bottom: 1rem;
+            color: var(--primary-color);
             display: flex;
-            justify-content: center;
             align-items: center;
-            height: 100vh;
-            overflow: hidden;
-            font-family: Arial, sans-serif;
+            gap: 0.5rem;
         }
-        
-        .iframe-container {
-            width: 95%;
-            height: 95vh;
-            border-radius: 20px;
-            overflow: hidden;
-            box-shadow: 0 0 30px rgba(0, 150, 255, 0.3);
-            position: relative;
+
+        .operator-options {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
         }
-        
-        iframe {
-            width: 100%;
-            height: 100%;
-            border: none;
-            background-color: #000;
-        }
-        
-        .loading {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+
+        .operator-option {
             display: flex;
             flex-direction: column;
-            justify-content: center;
             align-items: center;
-            background-color: #111;
-            color: #fff;
-            z-index: 10;
+            padding: 1rem;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
         }
-        
-        .loading-spinner {
-            border: 5px solid #f3f3f3;
-            border-top: 5px solid #3498db;
+
+        .operator-option:hover {
+            border-color: var(--secondary-color);
+        }
+
+        .operator-option input[type="radio"] {
+            display: none;
+        }
+
+        .operator-option input[type="radio"]:checked + .operator-icon {
+            border: 3px solid var(--secondary-color);
+        }
+
+        .operator-icon {
+            width: 60px;
+            height: 60px;
+            background-color: #f8f9fa;
             border-radius: 50%;
-            width: 50px;
-            height: 50px;
-            animation: spin 1s linear infinite;
-            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 0.5rem;
+            font-weight: bold;
+            font-size: 1.5rem;
+            border: 3px solid transparent;
+            transition: all 0.3s ease;
         }
-        
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+
+        .operator-option span {
+            font-weight: 600;
+            text-align: center;
+        }
+
+        .quantity-control {
+            margin-bottom: 1.5rem;
+        }
+
+        .quantity-control label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+
+        .quantity-control input {
+            width: 100%;
+            padding: 0.8rem;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+        }
+
+        .export-options {
+            margin-bottom: 1.5rem;
+        }
+
+        .export-options label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+
+        .export-options select {
+            width: 100%;
+            padding: 0.8rem;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        button {
+            padding: 0.8rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .generate-btn {
+            background-color: var(--secondary-color);
+            color: white;
+        }
+
+        .generate-btn:hover {
+            background-color: #2980b9;
+        }
+
+        .save-btn {
+            background-color: var(--success-color);
+            color: white;
+        }
+
+        .save-btn:hover {
+            background-color: #219653;
+        }
+
+        .clear-btn {
+            background-color: var(--accent-color);
+            color: white;
+        }
+
+        .clear-btn:hover {
+            background-color: #c0392b;
+        }
+
+        .results {
+            margin-top: 2rem;
+        }
+
+        .results-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .results-count {
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .numbers-list {
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 1rem;
+        }
+
+        .number-item {
+            padding: 0.8rem;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .number-item:last-child {
+            border-bottom: none;
+        }
+
+        .number-item.invalid {
+            background-color: #fff8e1;
+        }
+
+        .number-value {
+            font-family: monospace;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .copy-btn {
+            background: none;
+            border: none;
+            color: var(--secondary-color);
+            cursor: pointer;
+            padding: 0.2rem;
+        }
+
+        .progress-container {
+            width: 100%;
+            background-color: #f1f1f1;
+            border-radius: 5px;
+            margin: 1rem 0;
+            display: none;
+        }
+
+        .progress-bar {
+            height: 20px;
+            background-color: var(--secondary-color);
+            border-radius: 5px;
+            width: 0%;
+            transition: width 0.3s ease;
+            text-align: center;
+            color: white;
+            font-weight: bold;
+            font-size: 0.8rem;
+            line-height: 20px;
+        }
+
+        .empty-message {
+            text-align: center;
+            color: #666;
+            padding: 1rem;
+        }
+
+        .warning-message {
+            color: var(--warning-color);
+            margin-top: 1rem;
+            text-align: center;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
+            .operator-options {
+                grid-template-columns: 1fr;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+            }
+
+            button {
+                width: 100%;
+                justify-content: center;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="iframe-container">
-        <div class="loading">
-            <div class="loading-spinner"></div>
-            <p>Carregando o conteúdo...</p>
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-mobile-alt"></i> Gerador de Números Moçambicanos</h1>
+            <p>Gere números de telefone válidos (9 dígitos) e exporte em vários formatos</p>
+        </header>
+
+        <div class="card">
+            <div class="controls">
+                <div class="operator-select">
+                    <h3><i class="fas fa-sim-card"></i> Selecione a Operadora</h3>
+                    <div class="operator-options">
+                        <label class="operator-option">
+                            <input type="radio" name="operator" value="vodacom" checked>
+                            <div class="operator-icon">V</div>
+                            <span>Vodacom (84/85)</span>
+                        </label>
+                        <label class="operator-option">
+                            <input type="radio" name="operator" value="movitel">
+                            <div class="operator-icon">M</div>
+                            <span>Movitel (86/87)</span>
+                        </label>
+                        <label class="operator-option">
+                            <input type="radio" name="operator" value="tmcel">
+                            <div class="operator-icon">T</div>
+                            <span>TMCel (82/83)</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="quantity-control">
+                    <label for="quantity"><i class="fas fa-list-ol"></i> Quantidade de Números (1-5000)</label>
+                    <input type="number" id="quantity" min="1" max="5000" value="10">
+                </div>
+
+                <div class="filename-control">
+                    <label for="filename"><i class="fas fa-file-signature"></i> Nome do Arquivo (opcional)</label>
+                    <input type="text" id="filename" placeholder="numeros_mocambique">
+                </div>
+
+                <div class="export-options">
+                    <label for="exportFormat"><i class="fas fa-file-export"></i> Formato de Exportação</label>
+                    <select id="exportFormat">
+                        <option value="txt">Texto (TXT)</option>
+                        <option value="csv">CSV (Excel)</option>
+                        <option value="xlsx">Excel (XLSX)</option>
+                        <option value="xls">Excel (XLS)</option>
+                        <option value="vcf">vCard (VCF)</option>
+                        <option value="json">JSON</option>
+                    </select>
+                </div>
+
+                <div class="progress-container" id="progressContainer">
+                    <div class="progress-bar" id="progressBar">0%</div>
+                </div>
+
+                <div class="action-buttons">
+                    <button class="generate-btn" id="generateBtn">
+                        <i class="fas fa-random"></i> Gerar Números
+                    </button>
+                    <button class="save-btn" id="saveBtn" disabled>
+                        <i class="fas fa-download"></i> Exportar Contatos
+                    </button>
+                    <button class="clear-btn" id="clearBtn" disabled>
+                        <i class="fas fa-trash"></i> Limpar
+                    </button>
+                </div>
+            </div>
+
+            <div class="results">
+                <div class="results-header">
+                    <h3><i class="fas fa-list-ul"></i> Números Gerados</h3>
+                    <span class="results-count" id="resultsCount">0 números</span>
+                </div>
+                <div class="numbers-list" id="numbersList">
+                    <p class="empty-message">Nenhum número gerado ainda. Clique em "Gerar Números" para começar.</p>
+                </div>
+            </div>
         </div>
-        <iframe id="siteFrame" src="proxy.php"></iframe>
     </div>
 
     <script>
-        const iframe = document.getElementById('siteFrame');
-        const loading = document.querySelector('.loading');
-        
-        iframe.onload = function() {
-            loading.style.display = 'none';
+        document.addEventListener('DOMContentLoaded', function() {
+            // Elementos DOM
+            const generateBtn = document.getElementById('generateBtn');
+            const saveBtn = document.getElementById('saveBtn');
+            const clearBtn = document.getElementById('clearBtn');
+            const quantityInput = document.getElementById('quantity');
+            const filenameInput = document.getElementById('filename');
+            const exportFormat = document.getElementById('exportFormat');
+            const numbersList = document.getElementById('numbersList');
+            const resultsCount = document.getElementById('resultsCount');
+            const progressContainer = document.getElementById('progressContainer');
+            const progressBar = document.getElementById('progressBar');
             
-            // Tenta injetar um script para corrigir possíveis problemas
-            try {
-                const script = iframe.contentDocument.createElement('script');
-                script.text = `
-                    // Corrige links para abrirem no iframe
-                    document.addEventListener('click', function(e) {
-                        if (e.target.tagName === 'A') {
-                            e.preventDefault();
-                            window.parent.postMessage({ type: 'navigate', url: e.target.href }, '*');
-                        }
-                    });
+            // Array para armazenar os números gerados
+            let generatedNumbers = [];
+            
+            // Gerar números aleatórios
+            generateBtn.addEventListener('click', async function() {
+                const operator = document.querySelector('input[name="operator"]:checked').value;
+                const quantity = parseInt(quantityInput.value);
+                
+                if (quantity < 1 || quantity > 5000) {
+                    alert('Por favor, insira uma quantidade entre 1 e 5000');
+                    return;
+                }
+                
+                // Mostrar barra de progresso para grandes quantidades
+                if (quantity > 100) {
+                    progressContainer.style.display = 'block';
+                    progressBar.style.width = '0%';
+                    progressBar.textContent = '0%';
+                }
+                
+                // Gerar números em lotes para não travar a interface
+                generatedNumbers = await generatePhoneNumbersWithProgress(operator, quantity);
+                
+                displayNumbers(generatedNumbers);
+                
+                saveBtn.disabled = false;
+                clearBtn.disabled = false;
+                progressContainer.style.display = 'none';
+            });
+            
+            // Salvar números em arquivo
+            saveBtn.addEventListener('click', function() {
+                if (generatedNumbers.length === 0) {
+                    alert('Nenhum número para exportar');
+                    return;
+                }
+                
+                let filename = filenameInput.value.trim() || 'numeros_mocambique';
+                const format = exportFormat.value;
+                
+                switch(format) {
+                    case 'xlsx':
+                        exportToExcel(generatedNumbers, filename, 'xlsx');
+                        break;
+                    case 'xls':
+                        exportToExcel(generatedNumbers, filename, 'xls');
+                        break;
+                    case 'csv':
+                        downloadFile(filename + '.csv', generateCSV(generatedNumbers));
+                        break;
+                    case 'vcf':
+                        downloadFile(filename + '.vcf', generateVCF(generatedNumbers));
+                        break;
+                    case 'json':
+                        downloadFile(filename + '.json', generateJSON(generatedNumbers));
+                        break;
+                    default: // txt
+                        downloadFile(filename + '.txt', generateTXT(generatedNumbers));
+                }
+            });
+            
+            // Limpar resultados
+            clearBtn.addEventListener('click', function() {
+                generatedNumbers = [];
+                numbersList.innerHTML = '<p class="empty-message">Nenhum número gerado ainda. Clique em "Gerar Números" para começar.</p>';
+                resultsCount.textContent = '0 números';
+                saveBtn.disabled = true;
+                clearBtn.disabled = true;
+            });
+            
+            // Função para gerar números de telefone com 9 dígitos
+            function generatePhoneNumber(operator) {
+                const prefixes = {
+                    vodacom: ['84', '85'],
+                    movitel: ['86', '87'],
+                    tmcel: ['82', '83']
+                };
+                
+                const prefix = prefixes[operator][Math.floor(Math.random() * prefixes[operator].length)];
+                
+                // Gera 7 dígitos aleatórios (prefixo tem 2 dígitos -> total 9)
+                const suffix = Math.floor(1000000 + Math.random() * 9000000).toString();
+                const fullNumber = prefix + suffix;
+                
+                // Garante que o número tem exatamente 9 dígitos
+                if (fullNumber.length !== 9) {
+                    console.warn(`Número inválido gerado: ${fullNumber} (${fullNumber.length} dígitos)`);
+                    return generatePhoneNumber(operator); // Tenta novamente
+                }
+                
+                return fullNumber;
+            }
+            
+            // Função para validar o número gerado
+            function isValidMozambicanNumber(number) {
+                return number.length === 9 && /^8[2-7]\d{7}$/.test(number);
+            }
+            
+            // Gerar números com barra de progresso
+            async function generatePhoneNumbersWithProgress(operator, quantity) {
+                const numbers = [];
+                const batchSize = 100; // Processar em lotes de 100
+                const batches = Math.ceil(quantity / batchSize);
+                
+                for (let i = 0; i < batches; i++) {
+                    const currentBatchSize = Math.min(batchSize, quantity - (i * batchSize));
                     
-                    // Notifica se houve bloqueio
-                    if (window === window.top) {
-                        window.parent.postMessage({ type: 'frameBlocked' }, '*');
+                    for (let j = 0; j < currentBatchSize; j++) {
+                        numbers.push(generatePhoneNumber(operator));
                     }
-                `;
-                iframe.contentDocument.head.appendChild(script);
-            } catch (e) {
-                // Ignora erros de cross-origin
+                    
+                    // Atualizar progresso
+                    if (quantity > 100) {
+                        const progress = Math.floor(((i + 1) / batches) * 100);
+                        progressBar.style.width = `${progress}%`;
+                        progressBar.textContent = `${progress}%`;
+                        
+                        // Dar tempo para a interface atualizar
+                        await new Promise(resolve => setTimeout(resolve, 0));
+                    }
+                }
+                
+                return numbers;
             }
-        };
-        
-        // Comunicação entre frames
-        window.addEventListener('message', function(e) {
-            if (e.data.type === 'navigate') {
-                iframe.src = e.data.url;
-                loading.style.display = 'flex';
-            } else if (e.data.type === 'frameBlocked') {
-                loading.innerHTML = '<p>O site não pode ser exibido nesta visualização.</p>';
-            }
-        });
-    </script>
-</body>
-  </html>
+            
+            // Exibir números na interface
+            function displayNumbers(numbers) {
+                numbersList.innerHTML = '';
+                
+                if (numbers.length === 0) {
+                    numbersList.innerHTML = '<p class="empty-message">Nenhum número gerado ainda. Clique em "Gerar Números" para começar.</p>';
+                    return;
+                }
+                
+                numbers.forEach(number => {
+                    const isValid = isValidMozambicanNumber(number);
+                    const numberItem = document.createElement('div');
+                    numberItem.className = `number-item ${isValid ? '' : 'invalid'}`;
+                    
+                    const numberValue = document.createElement('span');
+                    numberValue.className = 'number-value';
+                    numberValue.textContent = `+258 ${number}`;
+                    
+                    if (!isValid) {
+                        const warningIcon = document.createElement('i');
+                        warningIcon.className = 'fas fa-exclamation-circle';
+                        warningIcon.style.color = 'var(--warning-color)';
+                        warningIcon.title = 'Número inválido - não segue o padrão moçambicano';
+                        numberValue.prepend(warningIcon);
+                    }
+                    
+                    const copyBtn = document.createElement('button');
+                    copyBtn.className = 'copy-btn';
+                    copyBtn.innerHTML = '<i class="far fa-copy"></i>';
+                    copyBtn.title = 'Copiar número';
+                    copyBtn.addEventListener('click', () => {
+                        navigator.clipboard.w
