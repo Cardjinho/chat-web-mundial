@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Aviator Predictor | Escolha seu Plano</title>
+  <!-- Fonte elegante -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <!-- Ícones -->
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, #0f1b3a, #1a2b50);
+      color: #fff;
+      min-height: 100vh;
+      padding: 40px 20px;
+    }
+    .container {
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+    .header {
+      text-align: center;
+      padding-bottom: 40px;
+    }
+    .logo {
+      font-size: 2.8rem;
+      font-weight: 800;
+      background: linear-gradient(90deg, #00c853, #43e97b);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .subtitle {
+      font-size: 1.1rem;
+      opacity: 0.9;
+      margin-top: 10px;
+    }
+    .plans {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 24px;
+      margin-bottom: 40px;
+    }
+    .plan {
+      background: rgba(255, 255, 255, 0.08);
+      backdrop-filter: blur(10px);
+      border-radius: 18px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 30px;
+      width: 280px;
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.3s, box-shadow 0.3s;
+    }
+    .plan:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+    }
+    .badge {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      padding: 6px 12px;
+      border-radius: 20px;
+      text-transform: uppercase;
+    }
+    .badge.premium {
+      background: #ffeb3b;
+      color: #000;
+    }
+    .badge.plus {
+      background: #2196f3;
+      color: white;
+    }
+    .badge.popular {
+      background: #ff9800;
+      color: white;
+    }
+    .plan h3 {
+      font-size: 1.5rem;
+      margin-bottom: 10px;
+      color: #00c853;
+    }
+    .price {
+      font-size: 2.2rem;
+      font-weight: 700;
+      margin: 10px 0;
+    }
+    .validade {
+      font-size: 0.95rem;
+      opacity: 0.9;
+      margin-bottom: 20px;
+    }
+    .features {
+      list-style: none;
+      margin-bottom: 25px;
+      font-size: 0.95rem;
+      line-height: 1.6;
+    }
+    .features li {
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .features .material-icons-round {
+      font-size: 1.1rem;
+      color: #00c853;
+    }
+    .btn {
+      background: #00c853;
+      color: white;
+      border: none;
+      padding: 14px;
+      font-size: 1.05rem;
+      font-weight: 600;
+      border-radius: 10px;
+      cursor: pointer;
+      width: 100%;
+      transition: background 0.3s;
+    }
+    .btn:hover {
+      background: #00e676;
+    }
+
+    /* Sala de Sinais */
+    .signals {
+      text-align: center;
+      background: rgba(255, 255, 255, 0.06);
+      border-radius: 16px;
+      padding: 25px;
+      margin: 0 auto;
+      max-width: 400px;
+    }
+    .signals h3 {
+      font-size: 1.4rem;
+      color: #ff9800;
+      margin-bottom: 10px;
+    }
+    .signals .price {
+      font-size: 1.8rem;
+      color: #ff9800;
+    }
+
+    /* Responsivo */
+    @media (max-width: 768px) {
+      .plans {
+        flex-direction: column;
+        align-items: center;
+      }
+      .plan {
+        width: 100%;
+        max-width: 320px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <div class="header">
+      <div class="logo">Aviator Predictor</div>
+      <p class="subtitle">Tenha acesso aos melhores sinais e previsões em tempo real</p>
+    </div>
+
+    <div class="plans">
+      <!-- Plano 1: Básico -->
+      <div class="plan">
+        <span class="badge popular">Popular</span>
+        <h3>1 Dia</h3>
+        <div class="price">800,00 MZN</div>
+        <div class="validade">Acesso por 1 dia</div>
+        <ul class="features">
+          <li><span class="material-icons-round">check</span> Acesso ao Predictor</li>
+          <li><span class="material-icons-round">access_time</span> Atualizações em tempo real</li>
+          <li><span class="material-icons-round">history</span> Histórico de voos</li>
+        </ul>
+        <button class="btn" onclick="irParaPagamento(800.00)">
+          Pagar Agora
+        </button>
+      </div>
+
+      <!-- Plano 2: Médio -->
+      <div class="plan">
+        <span class="badge plus">Plus</span>
+        <h3>3 Dias</h3>
+        <div class="price">2500,00 MZN</div>
+        <div class="validade">Acesso por 3 dias</div>
+        <ul class="features">
+          <li><span class="material-icons-round">check</span> Acesso ao Predictor</li>
+          <li><span class="material-icons-round">support_agent</span> Suporte 24/3</li>
+          <li><span class="material-icons-round">trending_up</span> Previsões avançadas</li>
+          <li><span class="material-icons-round">history</span> Histórico completo</li>
+        </ul>
+        <button class="btn" onclick="irParaPagamento(2500.00)">
+          Pagar Agora
+        </button>
+      </div>
+
+      <!-- Plano 3: Premium -->
+      <div class="plan">
+        <span class="badge premium">Premium</span>
+        <h3>7 Dias</h3>
+        <div class="price">7000,00 MZN</div>
+        <div class="validade">Acesso por 7 dias</div>
+        <ul class="features">
+          <li><span class="material-icons-round">check</span> Acesso ao Predictor</li>
+          <li><span class="material-icons-round">support_agent</span> Suporte 24/7</li>
+          <li><span class="material-icons-round">trending_up</span> Previsões premium</li>
+          <li><span class="material-icons-round">insights</span> Análise de padrões</li>
+          <li><span class="material-icons-round">verified</span> Taxa de acerto superior</li>
+        </ul>
+        <button class="btn" onclick="irParaPagamento(7000.00)">
+          Pagar Agora
+        </button>
+      </div>
+    </div>
+
+    <!-- Sala de Sinais -->
+    <div class="signals">
+      <h3>Sala de Sinais do Telegram</h3>
+      <div class="price">500,00 MZN</div>
+      <div class="validade">Validade: 2 Dias</div>
+      <p style="margin: 15px 0; font-size: 0.95rem; opacity: 0.9;">
+        Sinais com até 100% de acerto. Não operamos 24h por dia, apenas nos melhores momentos.
+      </p>
+      <button class="btn" style="background:#ff9800" onclick="irParaPagamento(500.00)">
+        Entrar na Sala
+      </button>
+    </div>
+  </div>
+
+  <script>
+    // Função para redirecionar para payment.html com o valor
+    function irParaPagamento(valor) {
+      // Salva o valor no localStorage
+      localStorage.setItem("valor", valor.toFixed(2));
+      
+      // Redireciona
+      window.location.href = "payment.html";
+    }
+  </script>
+
+</body>
+  </html>
