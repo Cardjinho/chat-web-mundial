@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LojaOnline | Pagamento</title>
+  <!-- Fonte profissional -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <!-- Ícones limpos -->
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #f8f9fa;
+      color: #333;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+    .container {
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+      width: 100%;
+      max-width: 460px;
+      overflow: hidden;
+    }
+    .header {
+      text-align: center;
+      padding: 40px 30px 20px;
+    }
+    .logo {
+      font-size: 2.2rem;
+      font-weight: 700;
+      color: #00c853;
+    }
+    .tagline {
+      font-size: 0.95rem;
+      color: #666;
+      margin-top: 8px;
+    }
+    .methods {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+      margin: 20px 0;
+      font-size: 0.9rem;
+      color: #555;
+    }
+    .method {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: #e8f5e8;
+      padding: 6px 10px;
+      border-radius: 6px;
+      color: #2e7d32;
+    }
+    .body {
+      padding: 30px;
+    }
+    .form-group {
+      margin-bottom: 20px;
+    }
+    .form-group label {
+      display: block;
+      font-size: 0.9rem;
+      color: #555;
+      margin-bottom: 8px;
+      font-weight: 500;
+    }
+    .form-group input {
+      width: 100%;
+      padding: 14px 16px;
+      font-size: 1rem;
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      background: #fafafa;
+      color: #333;
+    }
+    .form-group input[readonly] {
+      background: #f0f0f0;
+      color: #555;
+      cursor: not-allowed;
+    }
+    .form-group input:focus {
+      border-color: #00c853;
+      outline: none;
+    }
+    .btn-pay {
+      background: #00c853;
+      color: white;
+      border: none;
+      padding: 16px;
+      font-size: 1.05rem;
+      font-weight: 600;
+      border-radius: 10px;
+      cursor: pointer;
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      transition: background 0.3s;
+    }
+    .btn-pay:hover {
+      background: #00e676;
+    }
+    .loader {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      padding: 16px 0;
+      font-size: 0.95rem;
+      color: #666;
+      display: none;
+    }
+    .spinner {
+      width: 20px;
+      height: 20px;
+      border: 3px solid #f3f3f3;
+      border-top: 3px solid #00c853;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    .status {
+      margin-top: 20px;
+      padding: 14px;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      text-align: center;
+    }
+    .status.success {
+      background: #e8f5e9;
+      color: #2e7d32;
+      border: 1px solid #a5d6a7;
+    }
+    .status.error {
+      background: #ffebee;
+      color: #c62828;
+      border: 1px solid #ef9a9a;
+    }
+    .footer {
+      text-align: center;
+      padding: 20px;
+      font-size: 0.85rem;
+      color: #999;
+      border-top: 1px solid #eee;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <div class="header">
+      <div class="logo">LojaOnline</div>
+      <p class="tagline">Pague com segurança via M-Pesa ou eMola</p>
+      <div class="methods">
+        <span class="method">
+          <span class="material-icons-round">credit_score</span> M-Pesa
+        </span>
+        <span class="method">
+          <span class="material-icons-round">account_balance_wallet</span> eMola
+        </span>
+      </div>
+    </div>
+
+    <div class="body">
+      <form id="paymentForm">
+        <div class="form-group">
+          <label for="valor">Valor a Pagar (MZN)</label>
+          <input type="number" id="valor" placeholder="Aguardando..." readonly required>
+        </div>
+
+        <div class="form-group">
+          <label for="numero">Número do Cliente (84/85/86/87)</label>
+          <input type="tel" id="numero" placeholder="841234567" pattern="[8][4-7][0-9]{7}" required>
+        </div>
+
+        <button type="submit" class="btn-pay">
+          <span class="material-icons-round">payment</span>
+          <span>Confirmar Pagamento</span>
+        </button>
+      </form>
+
+      <div class="loader" id="loader">
+        <div class="spinner"></div>
+        <div>Processando...</div>
+      </div>
+
+      <div class="status" id="status" style="display: none;"></div>
+    </div>
+
+    <div class="footer">
+      Powered by <strong>Mozstore.vercel.app</strong>
+    </div>
+  </div>
+
+  <script>
+    // 🔐 Suas credenciais atualizadas
+    const API_KEY = "bf2bc841da82cacff7a81d9e8f562466263deca6fae76b970f9698a1860f2acf19c3abc44547efc4f4f3f3618263270aee3046b9909c0481591e80631ffcd8c2";
+    const WALLET_ID = "cd8e025e-e1bf-4c95-bcb0-3a5850a5f66e"; // ID da carteira "Lojaonline"
+
+    // 📥 Receber o valor de outra tela
+    // Pode vir por: URL, localStorage, ou passado por outra forma
+    function receberValor() {
+      // Exemplo 1: Via localStorage (recomendado)
+      const valorSalvo = localStorage.getItem("valor");
+      if (valorSalvo && !isNaN(valorSalvo) && parseFloat(valorSalvo) > 0) {
+        document.getElementById("valor").value = parseFloat(valorSalvo).toFixed(2);
+        return;
+      }
+
+      // Exemplo 2: Via URL: ?valor=150.00
+      const urlParams = new URLSearchParams(window.location.search);
+      const valorURL = urlParams.get("valor");
+      if (valorURL && !isNaN(valorURL) && parseFloat(valorURL) > 0) {
+        document.getElementById("valor").value = parseFloat(valorURL).toFixed(2);
+        return;
+      }
+
+      // Se nada for encontrado, mostra erro
+      document.getElementById("status").innerHTML = "⚠️ Valor não informado. Volte à loja.";
+      document.getElementById("status").className = "status error";
+      document.getElementById("status").style.display = "block";
+    }
+
+    // Executar ao carregar
+    window.onload = receberValor;
+
+    // 💸 Função: Fazer transferência
+    async function fazerTransferencia(valor, numero) {
+      try {
+        const response = await fetch("https://gibrapay.online/v1/transfer", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "API-Key": API_KEY
+          },
+          body: JSON.stringify({
+            wallet_id: WALLET_ID,
+            amount: parseFloat(valor),
+            number_phone: numero,
+            alert_sms: {
+              api_key: "2321:rTe9Gp-bkT7xs-3maVnL-zqLkP3",
+              sender_id: "LojaOnline",
+              phone: "852154364",
+              phone_customer: numero,
+              message: `Pagamento de ${valor} MZN confirmado.`,
+              customer_message: `Seu pagamento de ${valor} MZN foi confirmado. Obrigado!`
+            }
+          })
+        });
+
+        return await response.json();
+      } catch (error) {
+        throw new Error("Erro de conexão com o servidor.");
+      }
+    }
+
+    // 📝 Evento do formulário
+    document.getElementById("paymentForm").onsubmit = async (e) => {
+      e.preventDefault();
+
+      const valor = document.getElementById("valor").value.trim();
+      const numero = document.getElementById("numero").value.trim();
+      const status = document.getElementById("status");
+      const loader = document.getElementById("loader");
+
+      status.style.display = "none";
+      loader.style.display = "flex";
+
+      // Validar número
+      if (!numero || !/^[8][4-7]\d{7}$/.test(numero)) {
+        loader.style.display = "none";
+        status.innerHTML = "⚠️ Número inválido. Use 84, 85, 86 ou 87.";
+        status.className = "status error";
+        status.style.display = "block";
+        return;
+      }
+
+      try {
+        const data = await fazerTransferencia(valor, numero);
+        loader.style.display = "none";
+
+        if (data.status === "success") {
+          status.innerHTML = `✅ Pagamento de <strong>${valor} MZN</strong> confirmado!`;
+          status.className = "status success";
+          document.getElementById("paymentForm").reset();
+          document.getElementById("valor").value = valor; // Mantém o valor
+        } else {
+          const msg = data.message.toLowerCase();
+          if (msg.includes("saldo")) {
+            status.innerHTML = "❌ Saldo insuficiente na carteira.";
+          } else if (msg.includes("inválido") || msg.includes("número")) {
+            status.innerHTML = "❌ Número inválido ou serviço indisponível.";
+          } else {
+            status.innerHTML = `❌ ${data.message}`;
+          }
+          status.className = "status error";
+        }
+        status.style.display = "block";
+      } catch (error) {
+        loader.style.display = "none";
+        status.innerHTML = `🚨 ${error.message}`;
+        status.className = "status error";
+        status.style.display = "block";
+      }
+    };
+  </script>
+</body>
+  </html>
