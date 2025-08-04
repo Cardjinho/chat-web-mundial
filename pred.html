@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Al Naser | Predição Avançada</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+    <link rel="manifest" href="site.webmanifest">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+        }
+
+        :root {
+            --primary: #3b82f6;
+            --secondary: #8b5cf6;
+            --accent: #ec4899;
+            --dark: #0f172a;
+            --darker: #020617;
+            --light: #f8fafc;
+            --success: #10b981;
+        }
+
+        body {
+            background: linear-gradient(135deg, var(--darker), var(--dark));
+            color: var(--light);
+            min-height: 100vh;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .loader-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--darker);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            transition: opacity 0.5s ease;
+        }
+
+        .loader-circle {
+            width: 60px;
+            height: 60px;
+            border: 4px solid rgba(59, 130, 246, 0.3);
+            border-top: 4px solid var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 1rem;
+        }
+
+        .loader-text {
+            color: var(--light);
+            font-size: 1rem;
+            opacity: 0.8;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .background-shapes {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            overflow: hidden;
+        }
+
+        .shape {
+            position: absolute;
+            filter: blur(60px);
+            opacity: 0.15;
+        }
+
+        .shape-1 {
+            width: 500px;
+            height: 500px;
+            background: var(--primary);
+            top: -150px;
+            left: -150px;
+            border-radius: 40%;
+        }
+
+        .shape-2 {
+            width: 600px;
+            height: 600px;
+            background: var(--secondary);
+            bottom: -200px;
+            right: -100px;
+            border-radius: 30%;
+        }
+
+        .container {
+            position: relative;
+            z-index: 1;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2.5rem 1.5rem;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .logo {
+            font-size: 2.8rem;
+            font-weight: 800;
+            background: linear-gradient(45deg, var(--primary), var(--secondary), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 1rem;
+            letter-spacing: -0.5px;
+        }
+
+        .subtitle {
+            font-size: 1.1rem;
+            opacity: 0.8;
+            max-width: 700px;
+            margin: 0 auto 1.5rem;
+            line-height: 1.7;
+        }
+
+        .warning {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: rgba(251, 191, 36, 0.15);
+            color: #fbbf24;
+            padding: 0.7rem 1.2rem;
+            border-radius: 12px;
+            font-size: 0.95rem;
+            border: 1px solid rgba(251, 191, 36, 0.3);
+        }
+
+        .predictors {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2.5rem;
+            flex: 1;
+            align-items: stretch;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 20px;
+            padding: 2.2rem;
+            text-align: center;
+            backdrop-filter: blur(12px);
+            transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+            position: relative;
+            cursor: pointer;
+            opacity: 0;
+            transform: translateY(30px);
+        }
+
+        .card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25);
+            border-color: rgba(255, 255, 255, 0.25);
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 0.4s ease;
+            border-radius: 20px 20px 0 0;
+        }
+
+        .card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .card.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .card-delay-1 { transition-delay: 0.3s; }
+        .card-delay-2 { transition-delay: 0.5s; }
+
+        .product-img {
+            width: 100%;
+            height: 220px;
+            object-fit: cover;
+            border-radius: 14px;
+            margin-bottom: 1.8rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        }
+
+        .card-title {
+            font-size: 1.9rem;
+            font-weight: 700;
+            margin-bottom: 1.1rem;
+            color: white;
+        }
+
+        .highlight {
+            background: linear-gradient(45deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .card-desc {
+            font-size: 0.98rem;
+            opacity: 0.85;
+            margin-bottom: 1.6rem;
+            line-height: 1.7;
+        }
+
+        .features-list {
+            text-align: left;
+            margin-bottom: 1.8rem;
+            font-size: 0.95rem;
+        }
+
+        .feature-item {
+            display: flex;
+            align-items: center;
+            gap: 0.7rem;
+            margin-bottom: 0.8rem;
+        }
+
+        .feature-icon {
+            width: 28px;
+            height: 28px;
+            background: rgba(59, 130, 246, 0.15);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary);
+            font-weight: bold;
+        }
+
+        .cta-btn {
+            display: inline-block;
+            background: linear-gradient(45deg, var(--primary), var(--secondary));
+            color: white;
+            padding: 0.9rem 2.3rem;
+            border-radius: 50px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 20px rgba(59, 130, 246, 0.4);
+            border: none;
+            cursor: pointer;
+            font-size: 0.95rem;
+            text-transform: uppercase;
+        }
+
+        .cta-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 25px rgba(59, 130, 246, 0.6);
+        }
+
+        .cta-btn:active {
+            transform: translateY(-1px);
+        }
+
+        .auth-status {
+            text-align: center;
+            margin-top: 2.5rem;
+            padding: 1.2rem;
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            border-radius: 14px;
+            font-size: 1rem;
+            color: var(--success);
+            display: none;
+        }
+
+        .floating-particle {
+            position: absolute;
+            width: 6px;
+            height: 6px;
+            background: var(--primary);
+            border-radius: 50%;
+            opacity: 0;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+    <!-- Loader de autenticação -->
+    <div class="loader-overlay" id="authLoader">
+        <div class="loader-circle"></div>
+        <div class="loader-text">Verificando acesso...</div>
+    </div>
+
+    <div class="background-shapes">
+        <div class="shape shape-1"></div>
+        <div class="shape shape-2"></div>
+    </div>
+
+    <div class="floating-particle" aria-hidden="true"></div>
+
+    <div class="container">
+        <header>
+            <h1 class="logo">AL NASER</h1>
+            <p class="subtitle">Escolha o sistema de predição mais avançado do mercado. Tecnologia de ponta com IA treinada em milhões de rodadas para maximizar sua precisão.</p>
+            <div class="warning">
+                ⚠️ Sistema exclusivo para usuários autenticados
+            </div>
+        </header>
+
+        <main class="predictors" id="predictorGrid">
+            <!-- Aviator Predictor -->
+            <div class="card card-delay-1" id="aviatorCard">
+                <img src="https://placehold.co/600x400/1e40af/ffffff?text=AVIATOR+OFFICIAL+GAME" alt="Aviator Official Game" class="product-img">
+                <h2 class="card-title">AVIATOR <span class="highlight">PREDICTOR</span></h2>
+                <p class="card-desc">Sistema especializado no jogo Aviator com algoritmos de detecção de padrões, cash-out inteligente e alertas em tempo real.</p>
+                
+                <div class="features-list">
+                    <div class="feature-item">
+                        <span class="feature-icon">👁️</span>
+                        <span>Detecção de padrões ocultos</span>
+                    </div>
+                    <div class="feature-item">
+                        <span class="feature-icon">🔔</span>
+                        <span>Alertas sonoros inteligentes</span>
+                    </div>
+                    <div class="feature-item">
+                        <span class="feature-icon">📈</span>
+                        <span>Análise estatística avançada</span>
+                    </div>
+                    <div class="feature-item">
+                        <span class="feature-icon">⚡</span>
+                        <span>Resposta em menos de 0.2s</span>
+                    </div>
+                </div>
+                
+                <button class="cta-btn" onclick="goToAviator()">Iniciar Sistema</button>
+            </div>
+
+            <!-- JetX Predictor -->
+            <div class="card card-delay-2" id="jetxCard">
+                <img src="https://placehold.co/600x400/7c3aed/ffffff?text=JETX+GAME+SCREEN" alt="JetX Game Screen" class="product-img">
+                <h2 class="card-title">JETX <span class="highlight">PREDICTOR</span></h2>
+                <p class="card-desc">Predição otimizada para JetX com IA adaptativa, análise de volatilidade e previsão de multiplicadores ideais.</p>
+                
+                <div class="features-list">
+                    <div class="feature-item">
+                        <span class="feature-icon">🚀</span>
+                        <span>Previsão de multiplicadores</span>
+                    </div>
+                    <div class="feature-item">
+                        <span class="feature-icon">🧠</span>
+                        <span>Rede neural em tempo real</span>
+                    </div>
+                    <div class="feature-item">
+                        <span class="feature-icon">🛡️</span>
+                        <span>Modo de segurança avançado</span>
+                    </div>
+                    <div class="feature-item">
+                        <span class="feature-icon">📊</span>
+                        <span>Histórico de precisão diária</span>
+                    </div>
+                </div>
+                
+                <button class="cta-btn" onclick="goToJetX()">Iniciar Sistema</button>
+            </div>
+        </main>
+
+        <div class="auth-status" id="authStatus">
+            ✅ Acesso autorizado • Usuário premium verificado
+        </div>
+    </div>
+
+    <script>
+        // === VERIFICAÇÃO REAL DE AUTENTICAÇÃO ===
+        // A lógica: só permite acesso se veio de Al Naser.html com token válido na URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const authToken = urlParams.get('auth');
+
+        // Token esperado (simulação segura de autenticação)
+        const expectedToken = 'alnaser_premium_2025';
+
+        // Função de verificação
+        function verifyAccess() {
+            const loader = document.getElementById('authLoader');
+            const authStatus = document.getElementById('authStatus');
+            const cards = document.querySelectorAll('.card');
+            const grid = document.getElementById('predictorGrid');
+
+            // Verifica token
+            if (!authToken || authToken !== expectedToken) {
+                // Bloqueia acesso
+                setTimeout(() => {
+                    loader.querySelector('.loader-text').textContent = 'Acesso negado. Redirecionando...';
+                    setTimeout(() => {
+                        window.location.href = 'debug.html';
+                    }, 800);
+                }, 1200);
+                return false;
+            }
+
+            // Acesso autorizado
+            authStatus.style.display = 'block';
+            setTimeout(() => {
+                loader.style.opacity = '0';
+                setTimeout(() => {
+                    loader.style.display = 'none';
+                }, 500);
+
+                // Anima os cards
+                cards.forEach((card, index) => {
+                    setTimeout(() => {
+                        card.style.opacity = '1';
+                        card.style.transform = 'translateY(0)';
+                    }, 300 + (index * 200));
+                });
+            }, 800);
+
+            return true;
+        }
+
+        // Executa verificação ao carregar
+        verifyAccess();
+
+        // Funções de navegação
+        function goToAviator() {
+            window.location.href = '飛行士.html?auth=' + encodeURIComponent(authToken);
+        }
+
+        function goToJetX() {
+            window.location.href = 'ジェットックス.html?auth=' + encodeURIComponent(authToken);
+        }
+
+        // Partículas animadas
+        const container = document.querySelector('.container');
+        for (let i = 0; i < 15; i++) {
+            const p = document.createElement('div');
+            p.classList.add('floating-particle');
+            p.style.left = Math.random() * 100 + '%';
+            p.style.top = Math.random() * 100 + '%';
+            p.style.background = ['var(--primary)', 'var(--secondary)', 'var(--accent)'][Math.floor(Math.random() * 3)];
+            p.style.opacity = Math.random() * 0.5 + 0.2;
+            p.style.width = (2 + Math.random() * 4) + 'px';
+            p.style.height = p.style.width;
+            
+            container.appendChild(p);
+            
+            // Animação
+            p.animate([
+                { transform: 'translate(0, 0) rotate(0deg)', opacity: 0 },
+                { transform: 'translate(' + (Math.random() > 0.5 ? '' : '-') + Math.random() * 20 + 'px, -20px) rotate(' + (Math.random() * 360) + 'deg)', opacity: 0.7 },
+                { transform: 'translate(0, 0) rotate(0deg)', opacity: 0 }
+            ], {
+                duration: 8000 + Math.random() * 10000,
+                iterations: Infinity,
+                delay: Math.random() * 5000
+            });
+        }
+    </script>
+</body>
+</html>
