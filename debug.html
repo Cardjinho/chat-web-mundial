@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Mode</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+    <link rel="manifest" href="site.webmanifest">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Courier New', monospace;
+        }
+
+        body {
+            background: #000;
+            color: #0f0;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            overflow: hidden;
+        }
+
+        .header {
+            padding: 1rem;
+            background: rgba(0, 50, 0, 0.3);
+            border-bottom: 1px solid #0f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #0f0;
+            text-shadow: 0 0 5px #0f0;
+        }
+
+        .status {
+            display: flex;
+            gap: 1rem;
+            font-size: 0.9rem;
+        }
+
+        .status-item {
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #0f0;
+            box-shadow: 0 0 5px #0f0;
+            animation: blink 1.5s ease-in-out infinite;
+        }
+
+        .main {
+            flex: 1;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            padding: 1rem;
+        }
+
+        .panel {
+            background: rgba(0, 30, 0, 0.2);
+            border: 1px solid #0f0;
+            border-radius: 4px;
+            padding: 1rem;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .panel-header {
+            font-size: 0.9rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+            color: #0f0;
+            text-shadow: 0 0 3px #0f0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .matrix-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0.05;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .matrix {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: linear-gradient(rgba(0, 255, 0, 0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 255, 0, 0.1) 1px, transparent 1px);
+            background-size: 20px 20px;
+            animation: matrix-scroll 20s linear infinite;
+        }
+
+        .content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .metrics {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .metric {
+            background: rgba(0, 50, 0, 0.3);
+            border: 1px solid rgba(0, 255, 0, 0.3);
+            padding: 0.8rem;
+            border-radius: 4px;
+        }
+
+        .metric-label {
+            font-size: 0.8rem;
+            opacity: 0.8;
+            margin-bottom: 0.3rem;
+        }
+
+        .metric-value {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #0f0;
+            text-shadow: 0 0 3px #0f0;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 4px;
+            background: rgba(0, 255, 0, 0.1);
+            margin-top: 0.5rem;
+            overflow: hidden;
+            border-radius: 2px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: #0f0;
+            width: 0%;
+            transition: width 0.3s ease;
+            box-shadow: 0 0 5px #0f0;
+        }
+
+        .log-container {
+            height: 200px;
+            overflow-y: auto;
+            margin-top: 1rem;
+            scrollbar-width: thin;
+            scrollbar-color: #0f0 rgba(0, 30, 0, 0.3);
+        }
+
+        .log-container::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .log-container::-webkit-scrollbar-track {
+            background: rgba(0, 30, 0, 0.3);
+        }
+
+        .log-container::-webkit-scrollbar-thumb {
+            background: #0f0;
+            border-radius: 3px;
+        }
+
+        .log-entry {
+            font-size: 0.8rem;
+            margin-bottom: 0.3rem;
+            opacity: 0;
+            animation: fade-in 0.5s forwards;
+        }
+
+        .log-timestamp {
+            color: #0f0;
+            opacity: 0.7;
+            margin-right: 0.5rem;
+        }
+
+        .log-level {
+            padding: 0 0.3rem;
+            border-radius: 2px;
+            margin-right: 0.5rem;
+        }
+
+        .level-info {
+            background: rgba(0, 255, 0, 0.2);
+            color: #0f0;
+        }
+
+        .level-warning {
+            background: rgba(255, 255, 0, 0.2);
+            color: #ff0;
+        }
+
+        .level-error {
+            background: rgba(255, 0, 0, 0.2);
+            color: #f00;
+        }
+
+        .chart-container {
+            height: 150px;
+            position: relative;
+            margin-top: 1rem;
+        }
+
+        .chart-line {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 1px;
+            background: rgba(0, 255, 0, 0.1);
+        }
+
+        .chart-path {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 100px;
+            background: transparent;
+        }
+
+        .chart-svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        .footer {
+            padding: 0.5rem 1rem;
+            background: rgba(0, 50, 0, 0.3);
+            border-top: 1px solid #0f0;
+            font-size: 0.8rem;
+            text-align: center;
+            opacity: 0.7;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        @keyframes matrix-scroll {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(20px); }
+        }
+
+        @keyframes fade-in {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes pulse {
+            0%, 100% { box-shadow: 0 0 5px #0f0; }
+            50% { box-shadow: 0 0 15px #0f0; }
+        }
+
+        .pulse {
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="logo">DEBUG MODE</div>
+        <div class="status">
+            <div class="status-item">
+                <div class="status-dot"></div>
+                <span>ACTIVE</span>
+            </div>
+            <div class="status-item">
+                <div class="status-dot" style="background: #ff0; box-shadow: 0 0 5px #ff0;"></div>
+                <span>MONITORING</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="main">
+        <div class="panel">
+            <div class="matrix-bg">
+                <div class="matrix"></div>
+            </div>
+            <div class="panel-header">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M9 19V13H15V19C15 19.5304 14.7893 20.0391 14.4142 20.4142C14.0391 20.7893 13.5304 21 13 21H11C10.4696 21 9.96086 20.7893 9.58579 20.4142C9.21071 20.0391 9 19.5304 9 19Z" stroke="#0f0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M3 11V7C3 6.46957 3.21071 5.96086 3.58579 5.58579C3.96086 5.21071 4.46957 5 5 5H7C7.53043 5 8.03914 5.21071 8.41421 5.58579C8.78929 5.96086 9 6.46957 9 7V11C9 11.5304 8.78929 12.0391 8.41421 12.4142C8.03914 12.7893 7.53043 13 7 13H5C4.46957 13 3.96086 12.7893 3.58579 12.4142C3.21071 12.0391 3 11.5304 3 11Z" stroke="#0f0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M15 11V7C15 6.46957 15.2107 5.96086 15.5858 5.58579C15.9609 5.21071 16.4696 5 17 5H19C19.5304 5 20.0391 5.21071 20.4142 5.58579C20.7893 5.96086 21 6.46957 21 7V11C21 11.5304 20.7893 12.0391 20.4142 12.4142C20.0391 12.7893 19.5304 13 19 13H17C16.4696 13 15.9609 12.7893 15.5858 12.4142C15.2107 12.0391 15 11.5304 15 11Z" stroke="#0f0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                SISTEMA
+            </div>
+            <div class="content">
+                <div class="metrics">
+                    <div class="metric">
+                        <div class="metric-label">CPU USAGE</div>
+                        <div class="metric-value" id="cpuValue">0%</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="cpuBar"></div>
+                        </div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-label">MEMORY</div>
+                        <div class="metric-value" id="memoryValue">0 MB</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="memoryBar"></div>
+                        </div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-label">RESPONSE TIME</div>
+                        <div class="metric-value" id="responseValue">0ms</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="responseBar"></div>
+                        </div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-label">PRECISION</div>
+                        <div class="metric-value" id="precisionValue">0%</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="precisionBar"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="chart-container">
+                    <div class="chart-line" style="bottom: 25%;"></div>
+                    <div class="chart-line" style="bottom: 50%;"></div>
+                    <div class="chart-line" style="bottom: 75%;"></div>
+                    <div class="chart-path">
+                        <svg class="chart-svg" id="predictionChart">
+                            <path d="" stroke="#0f0" stroke-width="2" fill="none"/>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="panel">
+            <div class="matrix-bg">
+                <div class="matrix"></div>
+            </div>
+            <div class="panel-header">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M9 5H7C6.46957 5 5.96086 5.21071 5.58579 5.58579C5.21071 5.96086 5 6.46957 5 7V19C5 19.5304 5.21071 20.0391 5.58579 20.4142C5.96086 20.7893 6.46957 21 7 21H17C17.5304 21 18.0391 20.7893 18.4142 20.4142C18.7893 20.0391 19 19.5304 19 19V7C19 6.46957 18.7893 5.96086 18.4142 5.58579C18.0391 5.21071 17.5304 5 17 5H15" stroke="#0f0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M9 5C9 3.89543 9.89543 3 11 3H13C14.1046 3 15 3.89543 15 5C15 6.10457 14.1046 7 13 7H11C9.89543 7 9 6.10457 9 5Z" stroke="#0f0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M9 9H15" stroke="#0f0" stroke-width="2" stroke-linecap="round"/>
+                    <path d="M9 13H15" stroke="#0f0" stroke-width="2" stroke-linecap="round"/>
+                    <path d="M9 17H13" stroke="#0f0" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+                LOGS
+            </div>
+            <div class="content">
+                <div class="log-container" id="logContainer">
+                    <!-- Logs serão adicionados via JavaScript -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        DEBUG MODE ACTIVE • SYSTEM MONITORING • PREDICTION ENGINE v2.3.1
+    </div>
+
+    <script>
+        // Dados para os gráficos
+        const chartPath = document.getElementById('predictionChart').querySelector('path');
+        let chartData = Array(50).fill(50);
+        
+        // Atualizar gráfico
+        function updateChart() {
+            let path = '';
+            for (let i = 0; i < chartData.length; i++) {
+                const x = (i / (chartData.length - 1)) * 100;
+                const y = 100 - chartData[i];
+                
+                if (i === 0) {
+                    path = `M ${x} ${y}`;
+                } else {
+                    path += ` L ${x} ${y}`;
+                }
+            }
+            chartPath.setAttribute('d', path);
+        }
+        
+        // Gerar logs
+        const logContainer = document.getElementById('logContainer');
+        const logMessages = [
+            { level: 'INFO', message: 'System initialization complete' },
+            { level: 'INFO', message: 'Prediction engine loaded' },
+            { level: 'INFO', message: 'Data streams connected' },
+            { level: 'WARNING', message: 'High volatility detected in market data' },
+            { level: 'INFO', message: 'Neural network weights adjusted' },
+            { level: 'INFO', message: 'Pattern recognition module active' },
+            { level: 'ERROR', message: 'Anomaly detected in data validation' },
+            { level: 'INFO', message: 'Security protocols verified' },
+            { level: 'INFO', message: 'Prediction accuracy recalibrated' },
+            { level: 'WARNING', message: 'Resource usage approaching threshold' },
+            { level: 'INFO', message: 'Backup systems synchronized' },
+            { level: 'INFO', message: 'User authentication verified' }
+        ];
+        
+        function addLogEntry() {
+            const log = logMessages[Math.floor(Math.random() * logMessages.length)];
+            const now = new Date();
+            const timeString = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}:${now.getSeconds().toString().padStart(2, '0')}`;
+            
+            const logEntry = document.createElement('div');
+            logEntry.className = 'log-entry';
+            logEntry.innerHTML = `
+                <span class="log-timestamp">[${timeString}]</span>
+                <span class="log-level level-${log.level.toLowerCase()}">${log.level}</span>
+                <span>${log.message}</span>
+            `;
+            
+            logContainer.appendChild(logEntry);
+            
+            // Remover logs antigos se houver muitos
+            if (logContainer.children.length > 50) {
+                logContainer.removeChild(logContainer.children[0]);
+            }
+            
+            // Scroll automático
+            logContainer.scrollTop = logContainer.scrollHeight;
+        }
+        
+        // Atualizar métricas
+        function updateMetrics() {
+            // Simular valores realistas
+            const cpu = 30 + Math.random() * 40;
+            const memory = 1500 + Math.random() * 800;
+            const response = 45 + Math.random() * 30;
+            const precision = 85 + Math.random() * 10;
+            
+            document.getElementById('cpuValue').textContent = `${cpu.toFixed(1)}%`;
+            document.getElementById('memoryValue').textContent = `${Math.round(memory)} MB`;
+            document.getElementById('responseValue').textContent = `${response.toFixed(0)}ms`;
+            document.getElementById('precisionValue').textContent = `${precision.toFixed(1)}%`;
+            
+            document.getElementById('cpuBar').style.width = `${cpu}%`;
+            document.getElementById('memoryBar').style.width = `${(memory / 2500) * 100}%`;
+            document.getElementById('responseBar').style.width = `${(response / 100) * 100}%`;
+            document.getElementById('precisionBar').style.width = `${precision}%`;
+            
+            // Atualizar dados do gráfico
+            chartData.shift();
+            chartData.push(precision);
+            updateChart();
+        }
+        
+        // Inicializar
+        updateChart();
+        addLogEntry(); // Adicionar alguns logs iniciais
+        
+        // Atualizações periódicas
+        setInterval(updateMetrics, 800);
+        setInterval(addLogEntry, 1200);
+        
+        // Adicionar múltiplos logs iniciais
+        for (let i = 0; i < 8; i++) {
+            addLogEntry();
+        }
+        
+        // Efeito de pulsação nos indicadores
+        setInterval(() => {
+            const dots = document.querySelectorAll('.status-dot');
+            dots.forEach(dot => {
+                dot.style.opacity = '0.3';
+                setTimeout(() => {
+                    dot.style.opacity = '1';
+                }, 300);
+            });
+        }, 1800);
+    </script>
+</body>
+</html>
