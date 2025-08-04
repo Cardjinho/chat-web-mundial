@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>私 ROBOS DISPONÍVEIS</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', sans-serif;
+        }
+
+        :root {
+            --bg: #000000;
+            --card: #121212;
+            --border: #333333;
+            --text: #e6e6e6;
+            --text-light: #aaaaaa;
+            --primary: #3b82f6;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .container {
+            position: relative;
+            z-index: 1;
+            width: 100%;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            padding: 2rem;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .logo {
+            font-size: 2.3rem;
+            font-weight: 700;
+            background: linear-gradient(45deg, var(--primary), #8b5cf6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            font-size: 1rem;
+            opacity: 0.7;
+            margin-top: 0.5rem;
+        }
+
+        /* LOADER */
+        .loader {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: 1.5rem;
+        }
+
+        .step {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            font-size: 1.1rem;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            opacity: 0.7;
+            transition: all 0.3s ease;
+        }
+
+        .step.active {
+            opacity: 1;
+            border-color: var(--primary);
+            background: rgba(59, 130, 246, 0.1);
+        }
+
+        .step.completed {
+            opacity: 0.9;
+            background: rgba(59, 130, 246, 0.1);
+            border-color: var(--primary);
+        }
+
+        .step.failed {
+            opacity: 0.9;
+            background: rgba(239, 68, 68, 0.1);
+            border-color: var(--danger);
+        }
+
+        .icon {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+
+        .icon.pending { background: rgba(255, 255, 255, 0.1); color: var(--text-light); }
+        .icon.success { background: var(--success); color: white; }
+        .icon.error { background: var(--danger); color: white; }
+
+        .countdown {
+            text-align: center;
+            margin-top: 1.5rem;
+            font-size: 1rem;
+            color: var(--danger);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        /* ROBOTS */
+        .robots {
+            display: none;
+            opacity: 0;
+            transition: opacity 0.6s ease;
+            margin-top: 2rem;
+        }
+
+        .robot-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1.2rem;
+        }
+
+        .robot-item {
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 1.2rem;
+            display: flex;
+            align-items: center;
+            gap: 1.2rem;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .robot-item:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .robot-avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
+            color: white;
+            font-size: 1.5rem;
+        }
+
+        .robot-aviator {
+            background: linear-gradient(45deg, #1e90ff, #3b82f6);
+        }
+
+        .robot-jetx {
+            background: linear-gradient(45deg, #8b5cf6, #ec4899);
+        }
+
+        .robot-info {
+            flex: 1;
+        }
+
+        .robot-name {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: white;
+        }
+
+        .robot-desc {
+            font-size: 0.9rem;
+            opacity: 0.8;
+            line-height: 1.5;
+            margin-top: 0.3rem;
+        }
+
+        .action-btn {
+            background: rgba(59, 130, 246, 0.2);
+            color: var(--primary);
+            border: 1px solid rgba(59, 130, 246, 0.4);
+            padding: 0.6rem 1.3rem;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .action-btn:hover {
+            background: rgba(59, 130, 246, 0.3);
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">私 ROBOS DISPONÍVEIS</div>
+            <p class="subtitle">Sistema de verificação de acesso seguro</p>
+        </div>
+
+        <div class="loader" id="loader">
+            <div class="step active" id="step1">
+                <div class="icon pending" id="icon1">●</div>
+                <span>Conectando ao servidor...</span>
+            </div>
+
+            <div class="step" id="step2">
+                <div class="icon pending" id="icon2">●</div>
+                <span>Conectando aos cassinos...</span>
+            </div>
+
+            <div class="step" id="step3">
+                <div class="icon pending" id="icon3">●</div>
+                <span>Verificando nome de usuário...</span>
+            </div>
+
+            <div class="step" id="step4">
+                <div class="icon pending" id="icon4">●</div>
+                <span>Verificação concluída</span>
+            </div>
+
+            <div class="countdown" id="countdown">
+                Acesso negado. Redirecionando para <strong>debug.html</strong> em <span id="count">5</span> segundos...
+            </div>
+        </div>
+
+        <!-- ROBOTS -->
+        <div class="robots" id="robots">
+            <div class="robot-list">
+                <div class="robot-item">
+                    <div class="robot-avatar robot-aviator">AP</div>
+                    <div class="robot-info">
+                        <div class="robot-name">Aviator Predictor</div>
+                        <div class="robot-desc">Sistema de IA com detecção de padrões e alertas inteligentes em tempo real.</div>
+                    </div>
+                    <button class="action-btn" onclick="goToAviator()">Iniciar</button>
+                </div>
+
+                <div class="robot-item">
+                    <div class="robot-avatar robot-jetx">JP</div>
+                    <div class="robot-info">
+                        <div class="robot-name">JetX Predictor</div>
+                        <div class="robot-desc">Algoritmo especializado com previsão de multiplicadores e segurança avançada.</div>
+                    </div>
+                    <button class="action-btn" onclick="goToJetX()">Iniciar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // === CONFIGURAÇÃO DO FIREBASE (SUAS CREDENCIAIS) ===
+        const firebaseConfig = {
+            apiKey: "AIzaSyDj1qqCBztEpF31n9UU3DFKwiymc2Bd-iM",
+            authDomain: "bot-ia-20e75.firebaseapp.com",
+            databaseURL: "https://bot-ia-20e75-default-rtdb.firebaseio.com",
+            projectId: "bot-ia-20e75",
+            storageBucket: "bot-ia-20e75.appspot.com",
+            messagingSenderId: "601684351023",
+            appId: "1:601684351023:android:e94d0ab92f512c4cb80eda"
+        };
+
+        // Inicializar Firebase
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const database = firebase.database();
+
+        // Elementos
+        const icon1 = document.getElementById('icon1');
+        const icon2 = document.getElementById('icon2');
+        const icon3 = document.getElementById('icon3');
+        const icon4 = document.getElementById('icon4');
+        const step1 = document.getElementById('step1');
+        const step2 = document.getElementById('step2');
+        const step3 = document.getElementById('step3');
+        const step4 = document.getElementById('step4');
+        const countdown = document.getElementById('countdown');
+        const count = document.getElementById('count');
+        const robots = document.getElementById('robots');
+
+        // Função para completar etapa
+        function complete(icon, success, text) {
+            icon.classList.remove('pending');
+            icon.classList.add(success ? 'success' : 'error');
+            icon.textContent = success ? '✔' : '✖';
+            if (text) step3.innerHTML = text;
+        }
+
+        // Etapa 1: Conectar ao servidor
+        setTimeout(() => {
+            complete(icon1, true);
+            step1.classList.add('completed');
+            
+            // Etapa 2: Conectar aos cassinos
+            setTimeout(() => {
+                step2.classList.add('active');
+                complete(icon2, true);
+                step2.classList.add('completed');
+                
+                // Etapa 3: Verificar usuário
+                setTimeout(() => {
+                    step3.classList.add('active');
+                    
+                    auth.onAuthStateChanged((user) => {
+                        if (user) {
+                            // Usuário logado → buscar nome no auth
+                            const displayName = user.displayName || user.email || 'Usuário Premium';
+                            
+                            complete(icon3, true, `
+                                <div class="icon success">✔</div>
+                                <span>Usuário verificado: <strong>${displayName}</strong></span>
+                            `);
+                            step3.classList.add('completed');
+                            
+                            // Etapa 4: Concluído
+                            setTimeout(() => {
+                                step4.classList.add('active');
+                                complete(icon4, true);
+                                step4.classList.add('completed');
+                                
+                                // Mostrar robôs
+                                setTimeout(() => {
+                                    document.getElementById('loader').style.display = 'none';
+                                    robots.style.display = 'block';
+                                    setTimeout(() => {
+                                        robots.style.opacity = '1';
+                                    }, 100);
+                                }, 800);
+                            }, 1000);
+                        } else {
+                            // Usuário não autenticado
+                            complete(icon3, false, `
+                                <div class="icon error">✖</div>
+                                <span>Usuário não autenticado</span>
+                            `);
+                            step3.classList.add('failed');
+                            
+                            // Mostrar contagem regressiva
+                            countdown.style.opacity = '1';
+                            let seconds = 5;
+                            const timer = setInterval(() => {
+                                count.textContent = seconds--;
+                                if (seconds < 0) {
+                                    clearInterval(timer);
+                                    window.location.href = 'debug.html';
+                                }
+                            }, 1000);
+                        }
+                    }, (error) => {
+                        console.error("Erro na autenticação:", error);
+                        complete(icon3, false);
+                        step3.classList.add('failed');
+                        countdown.style.opacity = '1';
+                    });
+                    
+                }, 1500);
+            }, 1500);
+        }, 1000);
+
+        function goToAviator() {
+            window.location.href = '飛行士.html';
+        }
+
+        function goToJetX() {
+            window.location.href = 'ジェットックス.html';
+        }
+    </script>
+</body>
+</html>
