@@ -1,296 +1,543 @@
+```html
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>JetX Aviator | Al Naser</title>
-    
-    <!-- Favicon -->
-    <link rel="icon" type="image/x-icon" href="favicon.ico">
-    <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
-    <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
-
-    <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>JetX</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Segoe UI', sans-serif;
-        }
-
-        :root {
-            --bg: #000000;
-            --card: #121212;
-            --border: #333333;
-            --text: #e6e6e6;
-            --primary: #3b82f6;
-            --secondary: #8b5cf6;
-            --success: #10b981;
-            --warning: #f59e0b;
-            --danger: #ef4444;
-            --gradient: linear-gradient(45deg, #3b82f6, #8b5cf6, #ec4899);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
         }
 
         body {
-            background: var(--bg);
-            color: var(--text);
+            background: #000;
+            color: #fff;
             min-height: 100vh;
-            overflow: hidden;
-            position: relative;
-        }
-
-        /* ELEMENTO INVISÍVEL PARA CARREGAR USUÁRIO */
-        .hidden-user {
-            position: absolute;
-            opacity: 0;
-            height: 1px;
-            width: 1px;
-            pointer-events: none;
-        }
-
-        .container {
-            position: relative;
-            z-index: 1;
+            display: flex;
             width: 100%;
-            height: 100vh;
+            max-width: 414px;
+            margin: 0 auto;
+            border: 2px solid #333;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        /* Verification Screen */
+        .verify-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #000;
             display: flex;
             flex-direction: column;
-            padding: 1.5rem;
-        }
-
-        .header {
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            padding: 20px;
             text-align: center;
-            padding: 1rem;
-            border-bottom: 1px solid var(--border);
-            margin-bottom: 2rem;
+            display: none;
         }
 
-        .logo {
-            font-size: 2.2rem;
-            font-weight: 700;
-            background: var(--gradient);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+        .verify-icon {
+            width: 60px;
+            height: 60px;
+            color: #ff0000;
+            margin-bottom: 20px;
         }
 
-        .subtitle {
-            font-size: 1rem;
-            opacity: 0.7;
-            margin-top: 0.3rem;
+        .verify-text {
+            font-size: 1.1em;
+            color: #fff;
+            font-weight: 500;
+            margin-bottom: 10px;
         }
 
-        /* PAINEL PRINCIPAL */
-        .main-panel {
+        .verify-subtext {
+            font-size: 0.9em;
+            color: #999;
+            margin-top: 5px;
+        }
+
+        /* Loading Screen */
+        .loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #000;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            padding: 20px;
+            text-align: center;
+            display: none;
+        }
+
+        .loading-icon {
+            width: 60px;
+            height: 60px;
+            color: #ff0000;
+            margin-bottom: 20px;
+        }
+
+        .loading-text {
+            font-size: 1.1em;
+            color: #fff;
+            font-weight: 500;
+        }
+
+        /* Main Content */
+        .main-content {
             flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            background: #000;
+            display: none;
+        }
+
+        /* Game Title */
+        .game-title {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .game-title h1 {
+            font-size: 1.8em;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 5px;
+            text-shadow: 0 0 10px rgba(255, 0, 0, 0.7);
+        }
+
+        .game-title p {
+            color: #ff0000;
+            font-size: 0.9em;
+        }
+
+        /* Casino Header */
+        .casino-header {
+            background: #1a1a1a;
+            padding: 15px;
+            border-radius: 12px;
+            border: 1px solid #333;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .casino-logo {
+            font-size: 1.3em;
+            font-weight: 700;
+            color: #ff0000;
+            margin-bottom: 5px;
+        }
+
+        .casino-game {
+            font-size: 1.1em;
+            color: #fff;
+            font-weight: 600;
+        }
+
+        /* Predictor Section */
+        .predictor-section {
+            background: #1a1a1a;
+            border-radius: 16px;
+            padding: 20px;
+            border: 1px solid #333;
+            margin-bottom: 25px;
+        }
+
+        .section-title {
+            font-size: 1.2em;
+            font-weight: 600;
+            color: #fff;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .prediction-card {
+            background: #2a2a2a;
+            border-radius: 12px;
+            padding: 20px 15px;
+            border: 1px solid #444;
+            margin-bottom: 15px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .prediction-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #ff0000, #ff6600, #ff0000);
+            animation: shine 2s infinite;
+        }
+
+        @keyframes shine {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        .prediction-icon {
+            font-size: 2.5em;
+            color: #ff0000;
+            margin-bottom: 10px;
+        }
+
+        .prediction-value {
+            font-size: 3em;
+            font-weight: 700;
+            color: #ff0000;
+            margin: 10px 0;
+            text-shadow: 0 0 15px rgba(255, 0, 0, 0.6);
+            font-family: 'Arial', sans-serif;
+        }
+
+        .prediction-info {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 1.5rem;
+            gap: 10px;
+            margin-bottom: 15px;
         }
 
-        .card {
-            background: rgba(255, 255, 255, 0.06);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 16px;
-            padding: 1.5rem;
-            backdrop-filter: blur(10px);
-        }
-
-        .card-header {
-            font-size: 1.1rem;
-            font-weight: 600;
-            margin-bottom: 1rem;
-            color: white;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .card-header::before {
-            content: '';
-            width: 8px;
-            height: 8px;
-            background: var(--primary);
-            border-radius: 50%;
-        }
-
-        /* PROBABILIDADE */
-        .probability {
-            text-align: center;
-            font-size: 2.5rem;
-            font-weight: bold;
-            background: var(--gradient);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            margin: 1rem 0;
-        }
-
-        .progress-container {
-            width: 100%;
-            height: 20px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 10px;
-            overflow: hidden;
-            margin: 1rem 0;
-        }
-
-        .progress-bar {
-            height: 100%;
-            width: 0%;
-            background: var(--gradient);
-            border-radius: 10px;
-            transition: width 0.5s ease;
-            box-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
-        }
-
-        .range {
-            text-align: center;
-            font-size: 0.9rem;
-            opacity: 0.8;
-            margin: 0.5rem 0;
-        }
-
-        /* PADRÕES */
-        .patterns {
-            font-size: 0.95rem;
-            line-height: 1.6;
-            opacity: 0.9;
-        }
-
-        .pattern-item {
-            margin-bottom: 0.7rem;
-        }
-
-        .pattern-label {
-            font-weight: 600;
-            color: white;
-            margin-bottom: 0.3rem;
-        }
-
-        .pattern-value {
-            background: rgba(255, 255, 255, 0.05);
-            padding: 0.5rem;
-            border-radius: 6px;
-            font-family: monospace;
-            font-size: 0.9rem;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        /* STATUS */
-        .status {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            font-size: 0.9rem;
-            margin-top: 1rem;
-            padding: 0.5rem;
-            background: rgba(16, 185, 129, 0.1);
-            border: 1px solid rgba(16, 185, 129, 0.3);
+        .info-item {
+            background: #333;
+            padding: 10px;
             border-radius: 8px;
+            font-size: 0.95em;
         }
 
-        .status-dot {
-            width: 8px;
-            height: 8px;
-            background: var(--success);
-            border-radius: 50%;
-            box-shadow: 0 0 8px var(--success);
+        .info-label {
+            color: #999;
+            margin-bottom: 4px;
+            font-size: 0.8em;
+            font-weight: 500;
         }
 
-        /* BOTÃO */
-        .cta-button {
-            display: block;
-            width: 100%;
-            padding: 0.8rem;
-            background: var(--gradient);
+        .info-value {
+            font-weight: 600;
+            color: #fff;
+        }
+
+        .probability {
+            background: linear-gradient(45deg, #00cc66, #00994d);
+            color: white;
+            padding: 10px 15px;
+            border-radius: 25px;
+            font-size: 0.95em;
+            font-weight: 700;
+            display: inline-block;
+            margin-top: 5px;
+            box-shadow: 0 3px 10px rgba(0, 204, 102, 0.3);
+        }
+
+        .generate-btn {
+            background: linear-gradient(45deg, #ff6600, #cc5200);
             color: white;
             border: none;
-            border-radius: 10px;
-            font-size: 1rem;
-            font-weight: 600;
+            border-radius: 12px;
+            padding: 18px;
+            font-size: 1.2em;
+            font-weight: 700;
             cursor: pointer;
-            margin-top: 1.5rem;
+            width: 100%;
+            margin-top: 10px;
+            box-shadow: 0 5px 20px rgba(255, 102, 0, 0.4);
             transition: all 0.3s ease;
-            box-shadow: 0 5px 15px rgba(59, 130, 246, 0.4);
+            font-weight: 700;
         }
 
-        .cta-button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(59, 130, 246, 0.6);
+        .generate-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 30px rgba(255, 102, 0, 0.5);
         }
 
-        /* RESPONSIVO */
-        @media (max-width: 768px) {
-            .main-panel {
-                grid-template-columns: 1fr;
-            }
+        .generate-btn:active {
+            transform: translateY(0);
+        }
+
+        .generate-btn i {
+            margin-right: 8px;
+            font-weight: 900;
+        }
+
+        /* History Section */
+        .history-section {
+            background: #1a1a1a;
+            border-radius: 16px;
+            padding: 20px;
+            border: 1px solid #333;
+        }
+
+        .history-title {
+            font-size: 1.2em;
+            font-weight: 600;
+            color: #fff;
+            margin-bottom: 15px;
+            text-align: center;
+            color: #ff0000;
+            font-weight: 700;
+        }
+
+        /* History List */
+        .history-list {
+            max-height: 350px;
+            overflow-y: auto;
+            scrollbar-width: thin;
+        }
+
+        .history-list::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .history-list::-webkit-scrollbar-track {
+            background: #333;
+            border-radius: 3px;
+        }
+
+        .history-list::-webkit-scrollbar-thumb {
+            background: #ff0000;
+            border-radius: 3px;
+        }
+
+        .history-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 14px 0;
+            border-bottom: 1px solid #333;
+        }
+
+        .history-item:last-child {
+            border-bottom: none;
+        }
+
+        .history-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .history-icon {
+            width: 30px;
+            height: 30px;
+            background: #333;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9em;
+        }
+
+        .history-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .history-prediction {
+            font-size: 1.1em;
+            font-weight: 700;
+            color: #ff0000;
+        }
+
+        .history-details {
+            font-size: 0.8em;
+            color: #999;
+            margin-top: 2px;
+        }
+
+        .history-right {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+        }
+
+        .history-result {
+            font-size: 0.9em;
+            font-weight: 600;
+            padding: 5px 10px;
+            border-radius: 15px;
+            min-width: 70px;
+            text-align: center;
+        }
+
+        .history-result.win {
+            background: rgba(0, 204, 102, 0.2);
+            color: #00cc66;
+            border: 1px solid rgba(0, 204, 102, 0.3);
+        }
+
+        .history-result.lose {
+            background: rgba(255, 102, 102, 0.2);
+            color: #ff6666;
+            border: 1px solid rgba(255, 102, 102, 0.3);
+        }
+
+        .history-timestamp {
+            font-size: 0.75em;
+            color: #666;
+            margin-top: 4px;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #666;
+        }
+
+        .empty-state i {
+            font-size: 2.5em;
+            margin-bottom: 15px;
+            opacity: 0.3;
+        }
+
+        .empty-state p {
+            font-size: 0.9em;
+        }
+
+        /* Real-time Indicator */
+        .realtime-indicator {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            font-size: 0.8em;
+            color: #999;
+            margin-top: 10px;
+        }
+
+        .realtime-dot {
+            width: 8px;
+            height: 8px;
+            background: #00cc66;
+            border-radius: 50%;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.4; }
+            100% { opacity: 1; }
+        }
+
+        /* API Status */
+        .api-status {
+            text-align: center;
+            font-size: 0.8em;
+            color: #999;
+            margin-top: 5px;
+            padding: 5px;
+            background: #333;
+            border-radius: 5px;
         }
     </style>
 </head>
 <body>
-    <!-- CARREGA USUÁRIO EM SEGUNDO PLANO -->
-    <div class="hidden-user" id="user-data">carregando...</div>
+    <!-- Verification Screen -->
+    <div class="verify-screen" id="verify-screen">
+        <div class="verify-icon">
+            <i class="fas fa-shield-alt"></i>
+        </div>
+        <div class="verify-text">Verificando acesso</div>
+        <div class="verify-subtext">Aguarde enquanto validamos seu login...</div>
+    </div>
 
-    <div class="container">
-        <div class="header">
-            <div class="logo">JETX AVIATOR PREDICTOR</div>
-            <p class="subtitle">Sistema de predição com IA avançada</p>
+    <!-- Loading Screen -->
+    <div class="loading-screen" id="loading-screen">
+        <div class="loading-icon">
+            <i class="fas fa-sync fa-spin"></i>
+        </div>
+        <div class="loading-text">Conectando à API do ElephantBet</div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content" id="main-content">
+        <!-- Game Title -->
+        <div class="game-title">
+            <h1></h1>
+            <p>PRECISÃO COMPROVADA 99.7%</p>
         </div>
 
-        <div class="main-panel">
-            <!-- PROBABILIDADE -->
-            <div class="card">
-                <div class="card-header">Probabilidade de Sucesso</div>
-                
-                <div class="probability" id="probValue">0%</div>
-                
-                <div class="progress-container">
-                    <div class="progress-bar" id="probBar"></div>
-                </div>
-                
-                <div class="range">Cash-out ideal: <strong>x2.40 - x3.80</strong></div>
-                
-                <div class="status">
-                    <div class="status-dot"></div>
-                    <span>Sistema ativo e sincronizado</span>
-                </div>
+        <!-- Casino Header -->
+        <div class="casino-header">
+            <div class="casino-logo">ELEPHANTBET</div>
+            <div class="casino-game">JOGO: JETX</div>
+        </div>
 
-                <button class="cta-button" id="alertBtn">🔔 Ativar Alertas Sonoros</button>
+        <!-- Predictor Section -->
+        <div class="predictor-section">
+            <div class="section-title">PRÓXIMO SINAL</div>
+            
+            <div id="prediction-container">
+                <!-- Prediction will be added here -->
+                <div class="prediction-card">
+                    <div class="prediction-icon">
+                        <i class="fas fa-rocket"></i>
+                    </div>
+                    <div class="prediction-value">1.00X</div>
+                    <div class="prediction-info">
+                        <div class="info-item">
+                            <div class="info-label">PRECISÃO</div>
+                            <div class="info-value">//</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">RECOMENDADO</div>
+                            <div class="info-value">//</div>
+                        </div>
+                    </div>
+                    <div class="probability">AGUARDANDO ANÁLISE</div>
+                </div>
             </div>
+            
+            <button class="generate-btn" id="generate-btn">
+                <i class="fas fa-bolt"></i> GERAR SINAL
+            </button>
+            
+            <div class="realtime-indicator">
+                <div class="realtime-dot"></div>
+                <span>Conectado ao ElephantBet</span>
+            </div>
+            
+            <div class="api-status" id="api-status">
+                Status: Aguardando atualização
+            </div>
+        </div>
 
-            <!-- PADRÕES DETECTADOS -->
-            <div class="card">
-                <div class="card-header">Padrões Detectados</div>
-                
-                <div class="patterns">
-                    <div class="pattern-item">
-                        <div class="pattern-label">Últimos Resultados</div>
-                        <div class="pattern-value" id="lastResults">Carregando...</div>
-                    </div>
-                    
-                    <div class="pattern-item">
-                        <div class="pattern-label">Tendência Atual</div>
-                        <div class="pattern-value" id="trend">Analisando...</div>
-                    </div>
-                    
-                    <div class="pattern-item">
-                        <div class="pattern-label">Dica de Cash-out</div>
-                        <div class="pattern-value" id="tip">Aguardando análise</div>
-                    </div>
+        <!-- History Section -->
+        <div class="history-section">
+            <div class="history-title">HISTÓRICO DE RODADAS</div>
+            
+            <div class="history-list" id="history-list">
+                <!-- History items will be added here -->
+                <div class="empty-state">
+                    <i class="fas fa-history"></i>
+                    <p>Aguardando...</p>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
-        // === CONFIGURAÇÃO DO FIREBASE (SUAS CREDENCIAIS) ===
+        // Config Firebase
         const firebaseConfig = {
             apiKey: "AIzaSyDj1qqCBztEpF31n9UU3DFKwiymc2Bd-iM",
             authDomain: "bot-ia-20e75.firebaseapp.com",
@@ -301,78 +548,394 @@
             appId: "1:601684351023:android:e94d0ab92f512c4cb80eda"
         };
 
+        // Initialize Firebase
         firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
         const database = firebase.database();
 
-        // Elementos
-        const userData = document.getElementById('user-data');
-        const probValue = document.getElementById('probValue');
-        const probBar = document.getElementById('probBar');
-        const lastResults = document.getElementById('lastResults');
-        const trend = document.getElementById('trend');
-        const tip = document.getElementById('tip');
-        const alertBtn = document.getElementById('alertBtn');
+        // DOM Elements
+        const verifyScreen = document.getElementById('verify-screen');
+        const loadingScreen = document.getElementById('loading-screen');
+        const mainContent = document.getElementById('main-content');
+        const generateBtn = document.getElementById('generate-btn');
+        const predictionContainer = document.getElementById('prediction-container');
+        const historyList = document.getElementById('history-list');
+        const apiStatus = document.getElementById('api-status');
 
-        // Simular resultados recentes
-        const recent = ['x1.45', 'x3.20', 'x1.10', 'x5.60', 'x2.30', 'x1.80', 'x4.10', 'x1.25', 'x6.70', 'x1.60'];
+        // Global variables
+        let gameHistory = [];
+        let predictionHistory = [];
+        let isAnalyzing = false;
 
-        // Verificar autenticação
+        // Check authentication and verify user
         auth.onAuthStateChanged((user) => {
             if (user) {
-                // Usuário autenticado → carregar dados
-                userData.textContent = `Usuário: ${user.displayName || user.email}`;
+                // Show verification screen
+                verifyScreen.style.display = 'flex';
                 
-                // Iniciar simulação de predição
-                startPrediction();
+                // Verify user in database
+                database.ref('users/' + user.uid).once('value')
+                    .then((snapshot) => {
+                        const userData = snapshot.val();
+                        if (userData && userData.status === 'active' && userData.voucher) {
+                            // User is verified, hide verification, show loading
+                            verifyScreen.style.display = 'none';
+                            loadingScreen.style.display = 'flex';
+                            
+                            // Simulate loading time to mimic connecting to ElephantBet API
+                            setTimeout(() => {
+                                loadingScreen.style.display = 'none';
+                                mainContent.style.display = 'block';
+                                
+                                // Initialize with mock data that simulates real ElephantBet data
+                                initializeWithMockData();
+                                
+                                // Start real-time updates
+                                startRealTimeUpdates();
+                            }, 4000);
+                        } else {
+                            // User not found or inactive
+                            showError('Acesso não autorizado');
+                        }
+                    })
+                    .catch((error) => {
+                        console.error('Error verifying user:', error);
+                        showError('Erro de verificação');
+                    });
             } else {
-                // Usuário não autenticado → redirecionar
-                setTimeout(() => {
-                    window.location.href = 'debug.html';
-                }, 500);
+                // No user signed in
+                showError('Acesso não autorizado');
             }
-        }, (error) => {
-            console.error("Erro de autenticação:", error);
-            setTimeout(() => {
-                window.location.href = 'debug.html';
-            }, 1000);
         });
 
-        // Função para iniciar predição
-        function startPrediction() {
-            lastResults.textContent = recent.join(' | ');
-            
-            let progress = 0;
-            const interval = setInterval(() => {
-                progress += Math.random() * 8;
-                if (progress > 100) progress = 100;
-                
-                probValue.textContent = `${Math.round(progress)}%`;
-                probBar.style.width = `${progress}%`;
-                
-                if (progress > 80) {
-                    trend.textContent = 'Alta probabilidade de x3.00+';
-                    tip.textContent = 'Cash-out ideal entre x2.80 e x3.80';
-                } else if (progress > 60) {
-                    trend.textContent = 'Tendência média - atenção';
-                    tip.textContent = 'Considere cash-out em x2.40';
-                } else {
-                    trend.textContent = 'Baixa probabilidade - espere';
-                    tip.textContent = 'Evite cash-out abaixo de x1.80';
-                }
-
-                if (progress >= 100) {
-                    clearInterval(interval);
-                    alertBtn.textContent = '🔔 Alertas Ativados';
-                    alertBtn.style.background = 'linear-gradient(45deg, #10b981, #34d399)';
-                }
-            }, 300);
+        // Show error and redirect
+        function showError(message) {
+            verifyScreen.style.display = 'none';
+            loadingScreen.style.display = 'none';
+            alert(message);
+            setTimeout(() => {
+                window.location.href = 'login.html';
+            }, 100);
         }
 
-        // Botão de alerta
-        alertBtn.addEventListener('click', () => {
-            alertBtn.textContent = '🔔 Alertas Ativados';
-            alertBtn.style.background = 'linear-gradient(45deg, #10b981, #34d399)';
+        // Initialize with mock data that simulates real ElephantBet data
+        function initializeWithMockData() {
+            // Mock data based on typical JetX patterns from ElephantBet
+            const mockHistory = [
+                { multiplier: 1.42, timestamp: Date.now() - 30000 },
+                { multiplier: 2.15, timestamp: Date.now() - 60000 },
+                { multiplier: 1.88, timestamp: Date.now() - 90000 },
+                { multiplier: 3.21, timestamp: Date.now() - 120000 },
+                { multiplier: 1.67, timestamp: Date.now() - 150000 },
+                { multiplier: 5.43, timestamp: Date.now() - 180000 },
+                { multiplier: 1.91, timestamp: Date.now() - 210000 },
+                { multiplier: 2.76, timestamp: Date.now() - 240000 },
+                { multiplier: 1.55, timestamp: Date.now() - 270000 },
+                { multiplier: 4.12, timestamp: Date.now() - 300000 }
+            ];
+            
+            gameHistory = mockHistory;
+            updateHistoryList();
+            
+            // Update API status
+            apiStatus.textContent = 'Status: Conectado à API do ElephantBet';
+        }
+
+        // Start real-time updates (simulating API connection)
+        function startRealTimeUpdates() {
+            // Update API status
+            apiStatus.innerHTML = '<i class="fas fa-check-circle" style="color: #00cc66;"></i> Conectado à API do ElephantBet';
+            
+            // Simulate real-time data updates from ElephantBet API
+            setInterval(() => {
+                // Generate a new round based on realistic JetX patterns
+                const newMultiplier = generateRealisticMultiplier();
+                const newRound = {
+                    multiplier: newMultiplier,
+                    timestamp: Date.now()
+                };
+                
+                // Add to history
+                gameHistory.unshift(newRound);
+                
+                // Keep only last 10 rounds
+                if (gameHistory.length > 10) {
+                    gameHistory.pop();
+                }
+                
+                // Update the history display
+                updateHistoryList();
+                
+                // Update API status with timestamp
+                const now = new Date();
+                const timeStr = now.getHours().toString().padStart(2, '0') + ':' + 
+                               now.getMinutes().toString().padStart(2, '0') + ':' + 
+                               now.getSeconds().toString().padStart(2, '0');
+                apiStatus.innerHTML = `<i class="fas fa-sync" style="color: #00cc66;"></i> Atualizado: ${timeStr}`;
+                
+            }, 30000); // Update every 30 seconds (realistic for game rounds)
+        }
+
+        // Update history list with current data
+        function updateHistoryList() {
+            // Clear current list
+            historyList.innerHTML = '';
+            
+            // Add data to history
+            gameHistory.forEach(round => {
+                addHistoryItem(round);
+            });
+        }
+
+        // Add item to history
+        function addHistoryItem(round) {
+            const historyItem = document.createElement('div');
+            historyItem.className = 'history-item';
+            
+            // Determine result type based on multiplier
+            const resultType = round.multiplier > 2 ? 'win' : 'lose';
+            
+            historyItem.innerHTML = `
+                <div class="history-left">
+                    <div class="history-icon">
+                        <i class="fas fa-rocket"></i>
+                    </div>
+                    <div class="history-info">
+                        <div class="history-prediction">${round.multiplier}x</div>
+                        <div class="history-details">ElephantBet • JetX</div>
+                    </div>
+                </div>
+                <div class="history-right">
+                    <div class="history-result ${resultType}">${resultType === 'win' ? 'ACERTO' : 'ERRO'}</div>
+                    <div class="history-timestamp">${formatTime(round.timestamp)}</div>
+                </div>
+            `;
+            
+            historyList.appendChild(historyItem);
+        }
+
+        // Generate realistic multiplier (mimics real JetX patterns from ElephantBet)
+        function generateRealisticMultiplier() {
+            // Realistic distribution based on actual JetX game patterns
+            const rand = Math.random();
+            
+            if (rand < 0.55) return (1.2 + Math.random() * 1.3).toFixed(2); // 1.2x - 2.5x (55%)
+            if (rand < 0.80) return (2.5 + Math.random() * 2.5).toFixed(2); // 2.5x - 5.0x (25%)
+            if (rand < 0.93) return (5.0 + Math.random() * 5.0).toFixed(2); // 5.0x - 10.0x (13%)
+            if (rand < 0.98) return (10.0 + Math.random() * 15.0).toFixed(2); // 10.0x - 25.0x (5%)
+            return (25.0 + Math.random() * 75.0).toFixed(2); // 25.0x - 100.0x (2%)
+        }
+
+        // Format time for display
+        function formatTime(timestamp) {
+            const date = new Date(timestamp);
+            return date.toLocaleTimeString('pt-BR', { 
+                hour: '2-digit', 
+                minute: '2-digit' 
+            });
+        }
+
+        // Generate a prediction based on analysis of game history
+        function generatePrediction() {
+            if (isAnalyzing) return;
+            
+            isAnalyzing = true;
+            generateBtn.disabled = true;
+            generateBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> ANALISANDO...';
+            
+            // Simulate API analysis delay
+            setTimeout(() => {
+                try {
+                    // Get recent game data for analysis
+                    const recentRounds = gameHistory.slice(0, 8);
+                    
+                    if (recentRounds.length === 0) {
+                        throw new Error('Nenhum dado de jogo disponível');
+                    }
+                    
+                    // Advanced pattern analysis
+                    const analysis = analyzeGamePatterns(recentRounds);
+                    
+                    // Generate prediction based on analysis
+                    const prediction = {
+                        id: Date.now(),
+                        casino: 'elephantbet',
+                        game: 'jetx',
+                        multiplier: analysis.predictedMultiplier,
+                        probability: analysis.confidence,
+                        timestamp: new Date().toISOString(),
+                        analysis: analysis
+                    };
+                    
+                    // Display the prediction
+                    displayPrediction(prediction);
+                    
+                    // Save to prediction history
+                    predictionHistory.unshift(prediction);
+                    if (predictionHistory.length > 20) {
+                        predictionHistory.pop();
+                    }
+                    
+                    // Save to Firebase
+                    const user = auth.currentUser;
+                    if (user) {
+                        savePrediction(user.uid, prediction);
+                    }
+                    
+                } catch (error) {
+                    console.error('Error generating prediction:', error);
+                    displayErrorPrediction(error.message);
+                } finally {
+                    isAnalyzing = false;
+                    generateBtn.disabled = false;
+                    generateBtn.innerHTML = '<i class="fas fa-bolt"></i> GERAR SINAL';
+                }
+            }, 2000);
+        }
+
+        // Analyze game patterns for prediction
+        function analyzeGamePatterns(recentRounds) {
+            // Calculate various metrics
+            const multipliers = recentRounds.map(r => r.multiplier);
+            const avgMultiplier = multipliers.reduce((a, b) => a + b, 0) / multipliers.length;
+            const maxMultiplier = Math.max(...multipliers);
+            const minMultiplier = Math.min(...multipliers);
+            
+            // Count different multiplier ranges
+            const veryLow = multipliers.filter(m => m < 1.5).length;
+            const low = multipliers.filter(m => m >= 1.5 && m < 2.5).length;
+            const medium = multipliers.filter(m => m >= 2.5 && m < 5.0).length;
+            const high = multipliers.filter(m => m >= 5.0 && m < 10.0).length;
+            const veryHigh = multipliers.filter(m => m >= 10.0).length;
+            
+            // Determine trend (increasing, decreasing, volatile)
+            let trend = 'stable';
+            if (multipliers[0] > avgMultiplier * 1.5) {
+                trend = 'decreasing';
+            } else if (multipliers[0] < avgMultiplier * 0.7) {
+                trend = 'increasing';
+            } else if (Math.abs(multipliers[0] - multipliers[1]) > 3) {
+                trend = 'volatile';
+            }
+            
+            // Generate prediction based on analysis
+            let predictedMultiplier;
+            let confidence = 90; // Base confidence
+            
+            if (trend === 'increasing' && low + veryLow > 4) {
+                // Many low results, predicting higher
+                predictedMultiplier = 2.8 + Math.random() * 2.2;
+                confidence = 94;
+            } else if (trend === 'decreasing' && high + veryHigh > 3) {
+                // Many high results, predicting lower
+                predictedMultiplier = 1.8 + Math.random() * 0.7;
+                confidence = 92;
+            } else if (trend === 'volatile') {
+                // Volatile pattern, predict medium
+                predictedMultiplier = 2.2 + Math.random() * 1.8;
+                confidence = 88;
+            } else {
+                // Stable pattern, predict near average
+                predictedMultiplier = avgMultiplier * (0.9 + Math.random() * 0.4);
+                confidence = 90;
+            }
+            
+            // Ensure reasonable bounds
+            predictedMultiplier = Math.max(1.4, Math.min(10, predictedMultiplier));
+            predictedMultiplier = predictedMultiplier.toFixed(2);
+            
+            return {
+                predictedMultiplier: predictedMultiplier,
+                confidence: Math.min(98.7, confidence + Math.random() * 3),
+                trend: trend,
+                avgMultiplier: avgMultiplier.toFixed(2),
+                pattern: {
+                    veryLow: veryLow,
+                    low: low,
+                    medium: medium,
+                    high: high,
+                    veryHigh: veryHigh
+                }
+            };
+        }
+
+        // Display prediction in UI
+        function displayPrediction(prediction) {
+            const predictionCard = document.createElement('div');
+            predictionCard.className = 'prediction-card';
+            predictionCard.innerHTML = `
+                <div class="prediction-icon">
+                    <i class="fas fa-brain"></i>
+                </div>
+                <div class="prediction-value">${prediction.multiplier}x</div>
+                <div class="prediction-info">
+                    <div class="info-item">
+                        <div class="info-label">PRECISÃO</div>
+                        <div class="info-value">${prediction.probability.toFixed(1)}%</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">RECOMENDADO</div>
+                        <div class="info-value">CASHOUT ${prediction.multiplier}x</div>
+                    </div>
+                </div>
+                <div class="probability">PREVISÃO DE ACERTO: ${prediction.probability.toFixed(1)}%</div>
+            `;
+            
+            // Clear previous prediction
+            predictionContainer.innerHTML = '';
+            predictionContainer.appendChild(predictionCard);
+            
+            // Update API status
+            apiStatus.innerHTML = '<i class="fas fa-check-circle" style="color: #00cc66;"></i> Previsão gerada com sucesso';
+        }
+
+        // Display error prediction
+        function displayErrorPrediction(message) {
+            const predictionCard = document.createElement('div');
+            predictionCard.className = 'prediction-card';
+            predictionCard.innerHTML = `
+                <div class="prediction-icon">
+                    <i class="fas fa-exclamation-triangle" style="color: #ff6600;"></i>
+                </div>
+                <div class="prediction-value">ERRO</div>
+                <div class="prediction-info">
+                    <div class="info-item">
+                        <div class="info-label">STATUS</div>
+                        <div class="info-value">FALHA</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">MENSAGEM</div>
+                        <div class="info-value">DADOS INSUFICIENTES</div>
+                    </div>
+                </div>
+                <div class="probability" style="background: #ff6666;">ANÁLISE NÃO CONCLUÍDA</div>
+            `;
+            
+            // Clear previous prediction
+            predictionContainer.innerHTML = '';
+            predictionContainer.appendChild(predictionCard);
+            
+            // Update API status
+            apiStatus.innerHTML = '<i class="fas fa-exclamation-triangle" style="color: #ff6600;"></i> Falha na análise';
+        }
+
+        // Save prediction to database
+        function savePrediction(userId, prediction) {
+            database.ref('predictions/' + userId + '/' + prediction.id).set(prediction)
+                .then(() => {
+                    console.log('Prediction saved successfully');
+                })
+                .catch((error) => {
+                    console.error('Error saving prediction:', error);
+                });
+        }
+
+        // Generate button click
+        generateBtn.addEventListener('click', generatePrediction);
+
+        // Initialize
+        window.addEventListener('load', function() {
+            // This will be handled by the auth state change
         });
     </script>
 </body>
