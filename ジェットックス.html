@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JetX Aviator | Al Naser</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', sans-serif;
+        }
+
+        :root {
+            --bg: #000000;
+            --card: #121212;
+            --border: #333333;
+            --text: #e6e6e6;
+            --primary: #3b82f6;
+            --secondary: #8b5cf6;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --gradient: linear-gradient(45deg, #3b82f6, #8b5cf6, #ec4899);
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* ELEMENTO INVISÍVEL PARA CARREGAR USUÁRIO */
+        .hidden-user {
+            position: absolute;
+            opacity: 0;
+            height: 1px;
+            width: 1px;
+            pointer-events: none;
+        }
+
+        .container {
+            position: relative;
+            z-index: 1;
+            width: 100%;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            padding: 1.5rem;
+        }
+
+        .header {
+            text-align: center;
+            padding: 1rem;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 2rem;
+        }
+
+        .logo {
+            font-size: 2.2rem;
+            font-weight: 700;
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            font-size: 1rem;
+            opacity: 0.7;
+            margin-top: 0.3rem;
+        }
+
+        /* PAINEL PRINCIPAL */
+        .main-panel {
+            flex: 1;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 1.5rem;
+            backdrop-filter: blur(10px);
+        }
+
+        .card-header {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .card-header::before {
+            content: '';
+            width: 8px;
+            height: 8px;
+            background: var(--primary);
+            border-radius: 50%;
+        }
+
+        /* PROBABILIDADE */
+        .probability {
+            text-align: center;
+            font-size: 2.5rem;
+            font-weight: bold;
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin: 1rem 0;
+        }
+
+        .progress-container {
+            width: 100%;
+            height: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 1rem 0;
+        }
+
+        .progress-bar {
+            height: 100%;
+            width: 0%;
+            background: var(--gradient);
+            border-radius: 10px;
+            transition: width 0.5s ease;
+            box-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
+        }
+
+        .range {
+            text-align: center;
+            font-size: 0.9rem;
+            opacity: 0.8;
+            margin: 0.5rem 0;
+        }
+
+        /* PADRÕES */
+        .patterns {
+            font-size: 0.95rem;
+            line-height: 1.6;
+            opacity: 0.9;
+        }
+
+        .pattern-item {
+            margin-bottom: 0.7rem;
+        }
+
+        .pattern-label {
+            font-weight: 600;
+            color: white;
+            margin-bottom: 0.3rem;
+        }
+
+        .pattern-value {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 0.5rem;
+            border-radius: 6px;
+            font-family: monospace;
+            font-size: 0.9rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        /* STATUS */
+        .status {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+            margin-top: 1rem;
+            padding: 0.5rem;
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            border-radius: 8px;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background: var(--success);
+            border-radius: 50%;
+            box-shadow: 0 0 8px var(--success);
+        }
+
+        /* BOTÃO */
+        .cta-button {
+            display: block;
+            width: 100%;
+            padding: 0.8rem;
+            background: var(--gradient);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 1.5rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(59, 130, 246, 0.4);
+        }
+
+        .cta-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(59, 130, 246, 0.6);
+        }
+
+        /* RESPONSIVO */
+        @media (max-width: 768px) {
+            .main-panel {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- CARREGA USUÁRIO EM SEGUNDO PLANO -->
+    <div class="hidden-user" id="user-data">carregando...</div>
+
+    <div class="container">
+        <div class="header">
+            <div class="logo">JETX AVIATOR PREDICTOR</div>
+            <p class="subtitle">Sistema de predição com IA avançada</p>
+        </div>
+
+        <div class="main-panel">
+            <!-- PROBABILIDADE -->
+            <div class="card">
+                <div class="card-header">Probabilidade de Sucesso</div>
+                
+                <div class="probability" id="probValue">0%</div>
+                
+                <div class="progress-container">
+                    <div class="progress-bar" id="probBar"></div>
+                </div>
+                
+                <div class="range">Cash-out ideal: <strong>x2.40 - x3.80</strong></div>
+                
+                <div class="status">
+                    <div class="status-dot"></div>
+                    <span>Sistema ativo e sincronizado</span>
+                </div>
+
+                <button class="cta-button" id="alertBtn">🔔 Ativar Alertas Sonoros</button>
+            </div>
+
+            <!-- PADRÕES DETECTADOS -->
+            <div class="card">
+                <div class="card-header">Padrões Detectados</div>
+                
+                <div class="patterns">
+                    <div class="pattern-item">
+                        <div class="pattern-label">Últimos Resultados</div>
+                        <div class="pattern-value" id="lastResults">Carregando...</div>
+                    </div>
+                    
+                    <div class="pattern-item">
+                        <div class="pattern-label">Tendência Atual</div>
+                        <div class="pattern-value" id="trend">Analisando...</div>
+                    </div>
+                    
+                    <div class="pattern-item">
+                        <div class="pattern-label">Dica de Cash-out</div>
+                        <div class="pattern-value" id="tip">Aguardando análise</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // === CONFIGURAÇÃO DO FIREBASE (SUAS CREDENCIAIS) ===
+        const firebaseConfig = {
+            apiKey: "AIzaSyDj1qqCBztEpF31n9UU3DFKwiymc2Bd-iM",
+            authDomain: "bot-ia-20e75.firebaseapp.com",
+            databaseURL: "https://bot-ia-20e75-default-rtdb.firebaseio.com",
+            projectId: "bot-ia-20e75",
+            storageBucket: "bot-ia-20e75.appspot.com",
+            messagingSenderId: "601684351023",
+            appId: "1:601684351023:android:e94d0ab92f512c4cb80eda"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const database = firebase.database();
+
+        // Elementos
+        const userData = document.getElementById('user-data');
+        const probValue = document.getElementById('probValue');
+        const probBar = document.getElementById('probBar');
+        const lastResults = document.getElementById('lastResults');
+        const trend = document.getElementById('trend');
+        const tip = document.getElementById('tip');
+        const alertBtn = document.getElementById('alertBtn');
+
+        // Simular resultados recentes
+        const recent = ['x1.45', 'x3.20', 'x1.10', 'x5.60', 'x2.30', 'x1.80', 'x4.10', 'x1.25', 'x6.70', 'x1.60'];
+
+        // Verificar autenticação
+        auth.onAuthStateChanged((user) => {
+            if (user) {
+                // Usuário autenticado → carregar dados
+                userData.textContent = `Usuário: ${user.displayName || user.email}`;
+                
+                // Iniciar simulação de predição
+                startPrediction();
+            } else {
+                // Usuário não autenticado → redirecionar
+                setTimeout(() => {
+                    window.location.href = 'debug.html';
+                }, 500);
+            }
+        }, (error) => {
+            console.error("Erro de autenticação:", error);
+            setTimeout(() => {
+                window.location.href = 'debug.html';
+            }, 1000);
+        });
+
+        // Função para iniciar predição
+        function startPrediction() {
+            lastResults.textContent = recent.join(' | ');
+            
+            let progress = 0;
+            const interval = setInterval(() => {
+                progress += Math.random() * 8;
+                if (progress > 100) progress = 100;
+                
+                probValue.textContent = `${Math.round(progress)}%`;
+                probBar.style.width = `${progress}%`;
+                
+                if (progress > 80) {
+                    trend.textContent = 'Alta probabilidade de x3.00+';
+                    tip.textContent = 'Cash-out ideal entre x2.80 e x3.80';
+                } else if (progress > 60) {
+                    trend.textContent = 'Tendência média - atenção';
+                    tip.textContent = 'Considere cash-out em x2.40';
+                } else {
+                    trend.textContent = 'Baixa probabilidade - espere';
+                    tip.textContent = 'Evite cash-out abaixo de x1.80';
+                }
+
+                if (progress >= 100) {
+                    clearInterval(interval);
+                    alertBtn.textContent = '🔔 Alertas Ativados';
+                    alertBtn.style.background = 'linear-gradient(45deg, #10b981, #34d399)';
+                }
+            }, 300);
+        }
+
+        // Botão de alerta
+        alertBtn.addEventListener('click', () => {
+            alertBtn.textContent = '🔔 Alertas Ativados';
+            alertBtn.style.background = 'linear-gradient(45deg, #10b981, #34d399)';
+        });
+    </script>
+</body>
+</html>
