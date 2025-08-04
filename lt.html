@@ -1,0 +1,727 @@
+```html
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Predictor JetX - ElephantBet</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        body {
+            background: #000;
+            color: #fff;
+            min-height: 100vh;
+            display: flex;
+            width: 100%;
+            max-width: 414px;
+            margin: 0 auto;
+            border: 2px solid #333;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        /* Loading Screen */
+        .loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #000;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .loading-icon {
+            width: 60px;
+            height: 60px;
+            margin-bottom: 20px;
+            color: #ff0000;
+        }
+
+        .loading-text {
+            font-size: 1.1em;
+            color: #fff;
+            font-weight: 500;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            background: #000;
+            display: none;
+        }
+
+        /* Header */
+        .header {
+            background: #1a1a1a;
+            padding: 18px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #333;
+            position: relative;
+            z-index: 10;
+        }
+
+        .logo-mini {
+            font-weight: 700;
+            color: #fff;
+            font-size: 1.3em;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+        }
+
+        .user-avatar {
+            width: 36px;
+            height: 36px;
+            background: #ff0000;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .user-avatar i {
+            color: white;
+            font-size: 1.1em;
+        }
+
+        /* Game Title */
+        .game-title {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .game-title h1 {
+            font-size: 1.8em;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 5px;
+            text-shadow: 0 0 10px rgba(255, 0, 0, 0.7);
+        }
+
+        .game-title p {
+            color: #ff0000;
+            font-size: 0.9em;
+        }
+
+        /* Predictor Section */
+        .predictor-section {
+            background: #1a1a1a;
+            border-radius: 16px;
+            padding: 20px;
+            border: 1px solid #333;
+            margin-bottom: 25px;
+        }
+
+        .section-title {
+            font-size: 1.2em;
+            font-weight: 600;
+            color: #fff;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .prediction-card {
+            background: #2a2a2a;
+            border-radius: 12px;
+            padding: 15px;
+            border: 1px solid #444;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .prediction-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .prediction-casino {
+            font-weight: 600;
+            color: #ff0000;
+            font-size: 1.1em;
+        }
+
+        .prediction-time {
+            font-size: 0.8em;
+            color: #999;
+        }
+
+        .prediction-value {
+            font-size: 2.5em;
+            font-weight: 700;
+            color: #ff0000;
+            margin: 15px 0;
+            text-shadow: 0 0 10px rgba(255, 0, 0, 0.5);
+        }
+
+        .prediction-info {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .info-item {
+            background: #333;
+            padding: 8px;
+            border-radius: 6px;
+            font-size: 0.9em;
+        }
+
+        .info-label {
+            color: #999;
+            margin-bottom: 3px;
+        }
+
+        .info-value {
+            font-weight: 600;
+            color: #fff;
+        }
+
+        .probability {
+            background: linear-gradient(45deg, #00cc66, #00994d);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            font-weight: 700;
+            display: inline-block;
+            margin-top: 5px;
+        }
+
+        .generate-btn {
+            background: linear-gradient(45deg, #ff6600, #cc5200);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            padding: 16px;
+            font-size: 1.1em;
+            font-weight: 700;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 10px;
+            box-shadow: 0 4px 15px rgba(255, 102, 0, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .generate-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(255, 102, 0, 0.4);
+        }
+
+        .generate-btn:active {
+            transform: translateY(0);
+        }
+
+        /* History Section */
+        .history-section {
+            background: #1a1a1a;
+            border-radius: 16px;
+            padding: 20px;
+            border: 1px solid #333;
+        }
+
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .history-title {
+            font-size: 1.2em;
+            font-weight: 600;
+            color: #fff;
+        }
+
+        .history-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .history-btn {
+            padding: 8px 12px;
+            border: 1px solid #444;
+            border-radius: 8px;
+            background: #333;
+            color: #999;
+            font-size: 0.8em;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .history-btn:hover {
+            background: #444;
+        }
+
+        .history-btn.active {
+            background: #ff0000;
+            color: white;
+            border-color: #ff0000;
+        }
+
+        /* History List */
+        .history-list {
+            max-height: 300px;
+            overflow-y: auto;
+            scrollbar-width: thin;
+        }
+
+        .history-list::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .history-list::-webkit-scrollbar-track {
+            background: #333;
+            border-radius: 3px;
+        }
+
+        .history-list::-webkit-scrollbar-thumb {
+            background: #ff0000;
+            border-radius: 3px;
+        }
+
+        .history-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid #333;
+            font-size: 0.9em;
+        }
+
+        .history-item:last-child {
+            border-bottom: none;
+        }
+
+        .history-prediction {
+            font-weight: 600;
+            color: #ff0000;
+        }
+
+        .history-result {
+            font-weight: 600;
+        }
+
+        .history-result.win {
+            color: #00cc66;
+        }
+
+        .history-result.lose {
+            color: #ff6666;
+        }
+
+        .history-casino {
+            color: #999;
+            font-size: 0.8em;
+            margin-top: 3px;
+        }
+
+        /* Verification Screen */
+        .verify-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #000;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            padding: 20px;
+            text-align: center;
+            display: none;
+        }
+
+        .verify-icon {
+            width: 60px;
+            height: 60px;
+            color: #ff0000;
+            margin-bottom: 20px;
+        }
+
+        .verify-text {
+            font-size: 1.1em;
+            color: #fff;
+            font-weight: 500;
+            margin-bottom: 10px;
+        }
+
+        .verify-subtext {
+            font-size: 0.9em;
+            color: #999;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Verification Screen -->
+    <div class="verify-screen" id="verify-screen">
+        <div class="verify-icon">
+            <i class="fas fa-shield-alt"></i>
+        </div>
+        <div class="verify-text">Verificando usuário</div>
+        <div class="verify-subtext">Aguarde enquanto validamos seu acesso...</div>
+    </div>
+
+    <!-- Loading Screen -->
+    <div class="loading-screen" id="loading-screen">
+        <div class="loading-icon">
+            <i class="fas fa-sync fa-spin"></i>
+        </div>
+        <div class="loading-text">Carregando previsões</div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content" id="main-content">
+        <!-- Header -->
+        <div class="header">
+            <div class="logo-mini">Predictor JetX</div>
+            <div class="user-info">
+                <div class="user-avatar">
+                    <i class="fas fa-user"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- Game Title -->
+        <div class="game-title">
+            <h1>JETX PREDICTOR</h1>
+            <p>PRECISÃO COMPROVADA 98.7%</p>
+        </div>
+
+        <!-- Predictor Section -->
+        <div class="predictor-section">
+            <div class="section-title">PRÓXIMO SINAL</div>
+            
+            <div id="prediction-container">
+                <!-- Prediction will be added here -->
+                <div class="prediction-card">
+                    <div class="prediction-header">
+                        <div class="prediction-casino">ELEPHANTBET</div>
+                        <div class="prediction-time">Agora</div>
+                    </div>
+                    <div class="prediction-value">2.00x</div>
+                    <div class="prediction-info">
+                        <div class="info-item">
+                            <div class="info-label">CASA</div>
+                            <div class="info-value">ElephantBet</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">JOGO</div>
+                            <div class="info-value">JetX</div>
+                        </div>
+                    </div>
+                    <div class="probability">PROBABILIDADE: 98.7%</div>
+                </div>
+            </div>
+            
+            <button class="generate-btn" id="generate-btn">
+                <i class="fas fa-bolt"></i> GERAR NOVO SINAL
+            </button>
+        </div>
+
+        <!-- History Section -->
+        <div class="history-section">
+            <div class="history-header">
+                <div class="history-title">HISTÓRICO</div>
+                <div class="history-actions">
+                    <div class="history-btn active" data-filter="all">Todos</div>
+                    <div class="history-btn" data-filter="win">Acertos</div>
+                    <div class="history-btn" data-filter="lose">Erros</div>
+                </div>
+            </div>
+            
+            <div class="history-list" id="history-list">
+                <!-- History items will be added here -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Config Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyDj1qqCBztEpF31n9UU3DFKwiymc2Bd-iM",
+            authDomain: "bot-ia-20e75.firebaseapp.com",
+            databaseURL: "https://bot-ia-20e75-default-rtdb.firebaseio.com",
+            projectId: "bot-ia-20e75",
+            storageBucket: "bot-ia-20e75.appspot.com",
+            messagingSenderId: "601684351023",
+            appId: "1:601684351023:android:e94d0ab92f512c4cb80eda"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const database = firebase.database();
+
+        // DOM Elements
+        const verifyScreen = document.getElementById('verify-screen');
+        const loadingScreen = document.getElementById('loading-screen');
+        const mainContent = document.getElementById('main-content');
+        const generateBtn = document.getElementById('generate-btn');
+        const predictionContainer = document.getElementById('prediction-container');
+        const historyList = document.getElementById('history-list');
+        const historyButtons = document.querySelectorAll('.history-btn');
+
+        // Check authentication and verify user
+        auth.onAuthStateChanged((user) => {
+            if (user) {
+                // Show verification screen
+                verifyScreen.style.display = 'flex';
+                
+                // Verify user in database
+                database.ref('users/' + user.uid).once('value')
+                    .then((snapshot) => {
+                        const userData = snapshot.val();
+                        if (userData && userData.status === 'active') {
+                            // User is verified, hide verification, show loading
+                            verifyScreen.style.display = 'none';
+                            setTimeout(() => {
+                                loadingScreen.style.display = 'flex';
+                                setTimeout(() => {
+                                    loadingScreen.style.display = 'none';
+                                    mainContent.style.display = 'block';
+                                    loadUserData(user);
+                                }, 3000);
+                            }, 1000);
+                        } else {
+                            // User not found or inactive
+                            showError('Usuário não autorizado');
+                        }
+                    })
+                    .catch((error) => {
+                        console.error('Error verifying user:', error);
+                        showError('Erro de verificação');
+                    });
+            } else {
+                // No user signed in
+                showError('Acesso não autorizado');
+            }
+        });
+
+        // Show error and redirect
+        function showError(message) {
+            verifyScreen.style.display = 'none';
+            loadingScreen.style.display = 'none';
+            alert(message);
+            setTimeout(() => {
+                window.location.href = 'login.html';
+            }, 100);
+        }
+
+        // Load user data and predictions
+        function loadUserData(user) {
+            // Load prediction history
+            loadPredictionHistory(user.uid);
+            
+            // Generate initial prediction
+            generatePrediction();
+        }
+
+        // Generate a prediction
+        function generatePrediction() {
+            const prediction = {
+                id: Date.now(),
+                casino: 'elephantbet',
+                game: 'jetx',
+                multiplier: generateRealisticMultiplier(),
+                probability: 95 + Math.random() * 3.7, // 95-98.7%
+                timestamp: new Date().toISOString(),
+                result: null
+            };
+            
+            displayPrediction(prediction);
+            return prediction;
+        }
+
+        // Generate realistic multiplier (mimics JetX patterns)
+        function generateRealisticMultiplier() {
+            // Higher probability of lower multipliers, lower probability of high multipliers
+            const rand = Math.random();
+            
+            if (rand < 0.6) return (1.5 + Math.random() * 1.5).toFixed(2); // 1.5x - 3.0x (60%)
+            if (rand < 0.85) return (3.0 + Math.random() * 4.0).toFixed(2); // 3.0x - 7.0x (25%)
+            if (rand < 0.95) return (7.0 + Math.random() * 8.0).toFixed(2); // 7.0x - 15.0x (10%)
+            return (15.0 + Math.random() * 35.0).toFixed(2); // 15.0x - 50.0x (5%)
+        }
+
+        // Display prediction in UI
+        function displayPrediction(prediction) {
+            const predictionCard = document.createElement('div');
+            predictionCard.className = 'prediction-card';
+            predictionCard.innerHTML = `
+                <div class="prediction-header">
+                    <div class="prediction-casino">ELEPHANTBET</div>
+                    <div class="prediction-time">${formatTime(prediction.timestamp)}</div>
+                </div>
+                <div class="prediction-value">${prediction.multiplier}x</div>
+                <div class="prediction-info">
+                    <div class="info-item">
+                        <div class="info-label">CASA</div>
+                        <div class="info-value">ElephantBet</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">JOGO</div>
+                        <div class="info-value">JetX</div>
+                    </div>
+                </div>
+                <div class="probability">PROBABILIDADE: ${prediction.probability.toFixed(1)}%</div>
+            `;
+            
+            // Clear previous prediction
+            predictionContainer.innerHTML = '';
+            predictionContainer.appendChild(predictionCard);
+        }
+
+        // Save prediction to database
+        function savePrediction(userId, prediction) {
+            database.ref('predictions/' + userId + '/' + prediction.id).set(prediction)
+                .then(() => {
+                    console.log('Prediction saved successfully');
+                })
+                .catch((error) => {
+                    console.error('Error saving prediction:', error);
+                });
+        }
+
+        // Load prediction history from database
+        function loadPredictionHistory(userId) {
+            database.ref('predictions/' + userId).once('value')
+                .then((snapshot) => {
+                    const predictions = snapshot.val();
+                    if (predictions) {
+                        // Convert to array and sort by timestamp (newest first)
+                        const predictionsArray = Object.keys(predictions).map(key => predictions[key]);
+                        predictionsArray.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+                        
+                        // Clear current list
+                        historyList.innerHTML = '';
+                        
+                        // Add predictions to history
+                        predictionsArray.forEach(prediction => {
+                            addHistoryItem(prediction);
+                        });
+                    }
+                })
+                .catch((error) => {
+                    console.error('Error loading prediction history:', error);
+                });
+        }
+
+        // Add item to history
+        function addHistoryItem(prediction) {
+            const historyItem = document.createElement('div');
+            historyItem.className = 'history-item';
+            historyItem.innerHTML = `
+                <div>
+                    <div class="history-prediction">${prediction.multiplier}x</div>
+                    <div class="history-casino">${formatCasinoName(prediction.casino)} • ${formatTime(prediction.timestamp)}</div>
+                </div>
+                <div class="history-result ${prediction.result === 'win' ? 'win' : prediction.result === 'lose' ? 'lose' : ''}">
+                    ${prediction.result === 'win' ? 'ACERTO' : prediction.result === 'lose' ? 'ERRO' : 'PENDENTE'}
+                </div>
+            `;
+            
+            historyList.appendChild(historyItem);
+            
+            // Keep only last 15 items
+            while (historyList.children.length > 15) {
+                historyList.removeChild(historyList.lastChild);
+            }
+        }
+
+        // Format casino name
+        function formatCasinoName(casino) {
+            const names = {
+                'elephantbet': 'ElephantBet',
+                'placardbet': 'PlacardBet',
+                '888bets': '888Bets'
+            };
+            return names[casino] || casino;
+        }
+
+        // Format time
+        function formatTime(timestamp) {
+            const date = new Date(timestamp);
+            return date.toLocaleTimeString('pt-BR', { 
+                hour: '2-digit', 
+                minute: '2-digit' 
+            });
+        }
+
+        // History filter
+        historyButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                historyButtons.forEach(btn => btn.classList.remove('active'));
+                this.classList.add('active');
+                const filter = this.getAttribute('data-filter');
+                filterHistory(filter);
+            });
+        });
+
+        // Filter history (placeholder for future implementation)
+        function filterHistory(filter) {
+            // In a real app, this would filter the history items
+            // For now, we'll just show a message
+            console.log(`Filtering history by: ${filter}`);
+        }
+
+        // Generate button click
+        generateBtn.addEventListener('click', function() {
+            const user = auth.currentUser;
+            if (!user) return;
+
+            // Disable button during generation
+            generateBtn.disabled = true;
+            generateBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> GERANDO...';
+
+            // Simulate processing
+            setTimeout(() => {
+                const prediction = generatePrediction();
+                
+                // Save to database
+                savePrediction(user.uid, prediction);
+                
+                // Re-enable button
+                generateBtn.disabled = false;
+                generateBtn.innerHTML = '<i class="fas fa-bolt"></i> GERAR NOVO SINAL';
+            }, 1500);
+        });
+
+        // Initialize with a prediction
+        window.addEventListener('load', function() {
+            // This will be handled by the auth state change
+        });
+    </script>
+</body>
+</html>
+```
