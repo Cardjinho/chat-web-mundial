@@ -1,8 +1,12 @@
 {
   "rewrites": [
-    {
-      "source": "/pred",
-      "destination": "/pred.html"
-    }
+    { "source": "/pred", "destination": "/pred.html" },
+    { "source": "/planos", "destination": "/planos.html" },
+    { "source": "/assinar", "destination": "/payment.html" },
+    { "source": "/login", "destination": "/Al Naser.html" },
+    { "source": "/home", "destination": "/家.html" },
+    { "source": "/debug", "destination": "/debug.html" },
+    { "source": "/iniciar", "destination": "/index.html" },
+    { "source": "/termos", "destination": "/ジェットックス.html" }
   ]
 }
