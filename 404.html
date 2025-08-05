@@ -7,11 +7,17 @@
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap">
   <style>
     :root {
-      --primary: #6C5CE7;
-      --secondary: #00CEFF;
+      --primary: #6C5CE7;     /* Roxo moderno */
+      --secondary: #00CEFF;   /* Azul neon */
       --dark: #2D3436;
       --light: #F5F6FA;
       --shadow: 0 20px 40px rgba(0, 0, 0, 0.12);
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
     }
     
     body {
@@ -25,6 +31,7 @@
       text-align: center;
       padding: 2rem;
       line-height: 1.6;
+      overflow-x: hidden;
     }
     
     .container {
@@ -34,6 +41,24 @@
       padding: 4rem;
       box-shadow: var(--shadow);
       position: relative;
+      overflow: hidden;
+      z-index: 1;
+    }
+    
+    .container::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(108,92,231,0.08) 0%, rgba(0,206,255,0.04) 70%, transparent 100%);
+      z-index: -1;
+      animation: rotate 20s linear infinite;
+    }
+    
+    @keyframes rotate {
+      100% { transform: rotate(360deg); }
     }
     
     .illustration {
@@ -55,17 +80,23 @@
       background-clip: text;
       color: transparent;
       margin-bottom: 1rem;
+      font-weight: 700;
+      letter-spacing: -2px;
     }
     
     h2 {
       font-size: 2rem;
       margin-bottom: 1.5rem;
+      font-weight: 600;
     }
     
     p {
       font-size: 1.1rem;
       color: #636E72;
       margin-bottom: 3rem;
+      max-width: 600px;
+      margin-left: auto;
+      margin-right: auto;
     }
     
     .btn-group {
@@ -73,6 +104,7 @@
       gap: 1.5rem;
       justify-content: center;
       flex-wrap: wrap;
+      margin-bottom: 3rem;
     }
     
     .btn {
@@ -83,13 +115,15 @@
       border-radius: 12px;
       text-decoration: none;
       font-weight: 600;
-      transition: all 0.3s ease;
+      transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+      font-size: 1rem;
       gap: 8px;
     }
     
     .btn-primary {
       background: linear-gradient(135deg, var(--primary), var(--secondary));
       color: white;
+      border: none;
       box-shadow: 0 4px 15px rgba(108, 92, 231, 0.3);
     }
     
@@ -104,8 +138,28 @@
       box-shadow: 0 10px 25px rgba(108, 92, 231, 0.4);
     }
     
+    .telegram-link {
+      display: inline-flex;
+      align-items: center;
+      color: #0088CC;
+      text-decoration: none;
+      font-weight: 600;
+      margin-top: 1.5rem;
+      transition: all 0.3s ease;
+    }
+    
+    .telegram-link:hover {
+      color: #006699;
+    }
+    
+    .telegram-link svg {
+      width: 20px;
+      height: 20px;
+      margin-right: 8px;
+    }
+    
     footer {
-      margin-top: 3rem;
+      margin-top: 4rem;
       font-size: 0.9rem;
       color: #B2BEC3;
     }
@@ -118,11 +172,20 @@
       h1 {
         font-size: 4rem;
       }
+      
+      h2 {
+        font-size: 1.5rem;
+      }
+      
+      .illustration {
+        width: 200px;
+      }
     }
   </style>
 </head>
 <body>
   <div class="container">
+    <!-- Ilustração SVG Premium -->
     <div class="illustration">
       <svg viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
         <path fill="url(#gradient)" d="M256,48C141.1,48,48,141.1,48,256s93.1,208,208,208s208-93.1,208-208S370.9,48,256,48z M364.5,132.5
@@ -141,10 +204,10 @@
     
     <h1>404</h1>
     <h2>Página não encontrada</h2>
-    <p>O conteúdo que você está procurando pode ter sido movido ou não existe mais.</p>
+    <p>O conteúdo que você está procurando pode ter sido movido ou não existe mais. Enquanto isso, explore nossos outros recursos.</p>
     
     <div class="btn-group">
-      <!-- BOTÃO PÁGINA INICIAL (agora redireciona para /login) -->
+      <!-- BOTÃO MODIFICADO: agora redireciona para /login -->
       <a href="/login" class="btn btn-primary">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
           <path d="M10 20V14H14V20H19V12H22L12 3L2 12H5V20H10Z" fill="white"/>
@@ -152,17 +215,23 @@
         Página Inicial
       </a>
       
-      <!-- BOTÃO TELEGRAM (link direto) -->
-      <a href="https://t.me/MarquesEX" class="btn btn-outline" target="_blank">
+      <a href="https://t.me/MarquesEX" class="btn btn-outline">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
           <path d="M12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2ZM15.64 8.8C15.49 10.38 14.84 14.22 14.51 15.99C14.37 16.74 14.09 16.99 13.83 17.02C13.25 17.07 12.81 16.64 12.25 16.27C11.37 15.69 10.87 15.33 10.02 14.77C9.03 14.12 9.67 13.76 10.24 13.18C10.39 13.03 12.95 10.7 13 10.49C13.0069 10.4582 13.006 10.4252 12.9973 10.3938C12.9886 10.3624 12.9723 10.3337 12.95 10.31C12.89 10.26 12.81 10.28 12.74 10.29C12.65 10.31 11.11 11.38 8.71 13.31C8.23 13.69 7.8 13.88 7.42 13.86C7 13.83 6.19 13.55 5.54 13.31C4.77 13.03 4.18 12.88 4.22 12.5C4.24 12.31 4.62 12.11 5.27 11.9C9.69 10.33 12.42 9.28 13.47 8.74C17.67 6.71 18.5 6.37 18.96 6.37C19.06 6.37 19.27 6.39 19.41 6.51C19.52 6.61 19.55 6.74 19.56 6.83C19.56 6.92 19.57 7.12 19.46 7.25C19.36 7.38 17.81 8.76 15.64 10.86L15.64 8.8Z" fill="#6C5CE7"/>
         </svg>
-        Suporte no Telegram
+        Telegram
       </a>
     </div>
     
+    <a href="https://t.me/MarquesEX" class="telegram-link">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2ZM15.64 8.8C15.49 10.38 14.84 14.22 14.51 15.99C14.37 16.74 14.09 16.99 13.83 17.02C13.25 17.07 12.81 16.64 12.25 16.27C11.37 15.69 10.87 15.33 10.02 14.77C9.03 14.12 9.67 13.76 10.24 13.18C10.39 13.03 12.95 10.7 13 10.49C13.0069 10.4582 13.006 10.4252 12.9973 10.3938C12.9886 10.3624 12.9723 10.3337 12.95 10.31C12.89 10.26 12.81 10.28 12.74 10.29C12.65 10.31 11.11 11.38 8.71 13.31C8.23 13.69 7.8 13.88 7.42 13.86C7 13.83 6.19 13.55 5.54 13.31C4.77 13.03 4.18 12.88 4.22 12.5C4.24 12.31 4.62 12.11 5.27 11.9C9.69 10.33 12.42 9.28 13.47 8.74C17.67 6.71 18.5 6.37 18.96 6.37C19.06 6.37 19.27 6.39 19.41 6.51C19.52 6.61 19.55 6.74 19.56 6.83C19.56 6.92 19.57 7.12 19.46 7.25C19.36 7.38 17.81 8.76 15.64 10.86L15.64 8.8Z" fill="#0088CC"/>
+      </svg>
+      Precisa de ajuda? Fale conosco no Telegram
+    </a>
+    
     <footer>
-      <p>© <span id="year"></span> Aviator Predictor. © 2022 - 2025  Todos os direitos reservados.</p>
+      <p>© <span id="year"></span> Aviator Predictor. Todos os direitos reservados.</p>
     </footer>
   </div>
 
