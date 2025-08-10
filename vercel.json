@@ -8,5 +8,6 @@
     { "source": "/debug", "destination": "/debug.html" },
     { "source": "/iniciar", "destination": "/index.html" },
     { "source": "/termos", "destination": "/ジェットックス.html" }
+    { "source": "/aviator", "destination": "/飛行士.html" }
   ]
 }
